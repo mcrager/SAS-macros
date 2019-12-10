@@ -457,39 +457,39 @@ options mergenoby=nowarn;
 /* Check for errors in macro parameter specification */
 
    %if %length(&indsn.)=0 %then %do;
-      %put ERROR : GHI Note: STDLOGHR macro parameter indsn must be specified.;
+      %put ERROR :  STDLOGHR macro parameter indsn must be specified.;
       %abort;
    %end;
 
    %if %length(&vars.)=0 %then %do;
-      %put ERROR : GHI Note: STDLOGHR macro parameter vars must be specified.;
+      %put ERROR :  STDLOGHR macro parameter vars must be specified.;
       %abort;
    %end;
 
    %if %length(&time.)=0 %then %do;
-      %put ERROR : GHI Note: STDLOGHR macro parameter time must be specified.;
+      %put ERROR :  STDLOGHR macro parameter time must be specified.;
       %abort;
    %end;
 
    %if %length(&censor.)=0 %then %do;
-      %put ERROR : GHI Note: STDLOGHR macro parameter censor must be specified.;
+      %put ERROR :  STDLOGHR macro parameter censor must be specified.;
       %abort;
    %end;
 
    %if %length(&outdsn.)=0 %then %do;
-      %put ERROR : GHI Note: STDLOGHR macro parameter outdsn must be specified.;
+      %put ERROR :  STDLOGHR macro parameter outdsn must be specified.;
       %abort;
    %end;
 
    %if %length(&alpha.) %then %do;
    %if %sysevalf(&alpha. <= 0) or %sysevalf(&alpha. >= 1) %then %do;
-      %put ERROR : GHI Note: STDLOGHR macro parameter alpha must be >0 and <1.;
+      %put ERROR :  STDLOGHR macro parameter alpha must be >0 and <1.;
       %abort;
    %end;
    %end;
 
    %if %length(&var_combo_indsn.) > 0 and %length(&contribution_prefix.) = 0 %then %do;
-       %put  ERROR : GHI Note: STDLOGHR macro found parameter var_combo_indsn specified but parameter contribution_prefix not specified.;
+       %put  ERROR :  STDLOGHR macro found parameter var_combo_indsn specified but parameter contribution_prefix not specified.;
        %abort;
        %end;
 
@@ -601,7 +601,7 @@ options mergenoby=nowarn;
 %end;
 
 %if &doublespec_flag. > 0 %then %do;
-    %put ERROR : GHI Note: STDLOGHR macro found variable &&var&doublespec_flag.. listed in both parameter vars and parameter adjcov.  These two parameters must have distinct lists of variables.;
+    %put ERROR :  STDLOGHR macro found variable &&var&doublespec_flag.. listed in both parameter vars and parameter adjcov.  These two parameters must have distinct lists of variables.;
     %abort;
     %end;
 
@@ -638,10 +638,10 @@ options mergenoby=nowarn;
       %let pstrat&npstrat. = &pvar.;
       %end;
    %else %do;
-      %put ERROR : GHI Note: STDLOGHR macro parameter found specified partial variable &pvar..;
-      %put ERROR : GHI Note: This variable is not specified as an adjustment covariate or stratification variable.;
-      %if %length(&adjcov.) %then %put ERROR : GHI Note: Adjustment covariates:  &adjcov..;
-      %if %length(&strata.) %then %put ERROR : GHI Note: Stratification variables:  &strata..;
+      %put ERROR :  STDLOGHR macro parameter found specified partial variable &pvar..;
+      %put ERROR :  This variable is not specified as an adjustment covariate or stratification variable.;
+      %if %length(&adjcov.) %then %put ERROR :  Adjustment covariates:  &adjcov..;
+      %if %length(&strata.) %then %put ERROR :  Stratification variables:  &strata..;
       %abort;
       %end;        
 %end; 
@@ -685,7 +685,7 @@ options mergenoby=nowarn;
 %end;
 
 %if &doublespec_flag. > 0 %then %do;
-    %put ERROR : GHI Note: STDLOGHR macro found variable &&var&doublespec_flag.. listed in both parameter vars and parameter strata.  These two parameters must have distinct lists of variables.;
+    %put ERROR :  STDLOGHR macro found variable &&var&doublespec_flag.. listed in both parameter vars and parameter strata.  These two parameters must have distinct lists of variables.;
     %abort;
     %end;
 
@@ -1962,7 +1962,7 @@ end;
 
     if colflag = 1 then do;
 
-put "WARNING:  GHI Note:  Collinearity or near collinearity detected";
+put "WARNING:    Collinearity or near collinearity detected";
 put "among covariates &vars.";
 %if &byflag. = 1 %then put "for by variable value" %do i = 1 %to &nbyvar.; "  &&byvar&i..=" &&byvar&i.. %end;;  
 put "Standardized log hazard ratio not calculated.";
