@@ -3,35 +3,38 @@
 <body>
 
 <h1>Biomedical Research and Development SAS macros</h1>
-  
+
   <h2>Developer:  <a href="https://github.com/mcrager/SAS-macros/blob/master/Curriculum%20Vitae%20M%20Crager.pdf">Michael R. Crager, Ph.D.</a>  </h2>  <a href="mailto:claveguy@aol.com">claveguy@aol.com</a>
 
   <p>These macros are offered by the developer free of charge and without warranty.</p>
-  
+
   <p>TOPICS: </p>
    &nbsp;&nbsp;&nbsp;&nbsp; <a href=#"Time_to_event">Analysis of time-to-event endpoints (survival analysis) </a> <br />
-   &nbsp;&nbsp;&nbsp;&nbsp; <a href=#"Discovery analysis">Discovery analysis </a> <br /> 
+   &nbsp;&nbsp;&nbsp;&nbsp; <a href=#"Discovery analysis">Discovery analysis </a> <br />
 
   <h2 id="Time_to_event">Analysis of time-to-event endpoints (survival analysis) </h2>
-  
-  <h3>STDLOGHR</h3>  
+
+  <h3>STDLOGHR</h3>
   <p>This macro computes the standardized log hazard ratio, a measure of strength of association with the risk of an event, from a multivariable Cox proportional hazards regression.<br>  Reference:  Crager MR (2012).  Generalizing the standardized hazard
 ratio to multivariate proportional hazards regression, with an application to clinical~genomic studies.  <i>Journal of Applied Statistics</i> <b>39</b>:399–417.</p>
 
   <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr/STDLOGHR.sas">STDLOGHR.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr/STDLOGHR%20User%20Guide.pdf">User guide</a>
- 
-  
+
+
   <h3>STDLOG_INT</h3>
-  <p>This macro computes the standardized log hazard ratio for interactions of treatment (or other randomized intervention) with a set of variables from a multivariable Cox proportional hazards regression.</p> 
-  
+  <p>This macro computes the standardized log hazard ratio for interactions of treatment (or other randomized intervention) with a set of variables from a multivariable Cox proportional hazards regression.</p>
+
   <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr_int/STDLOGHR_INT.sas">STDLOGHR_INT.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr/STDLOGHR%20User%20Guide.pdf">User guide</a>
 
   <h2 id="Discovery">Discovery analysis</h2>
-    
+
     <h3>TDRDAS</h3>
     <p>Starting with a vertical input file containing a list of predictors and their standardized estimated degrees of association with some outcome or state, this macro identifies sets of the predictors with strong association with the outcome while controlling the false discovery rate (FDR) and produces estimates of the degree of association corrected for regression to the mean (RM).  Reference:  Crager MR (2010).  Gene identification using true discovery rate degree of association sets and estimates corrected for regression to the mean.  <i>Statistics in Medicine</i> <b>29</b>:33–45.</p>
+
+  <a href="https://github.com/mcrager/SAS-macros/blob/mcrager-patch-1/tdrdas/TDRDAS.sas">TDRDAS.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/mcrager-patch-1/tdrdas/Macro%20TDRDAS%20User%20Guide.doc">User guide</a>
 
 </body>
 </html>
