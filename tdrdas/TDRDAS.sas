@@ -1,9 +1,3 @@
-/**********************************************************************************************************************
-WARNING:
-THIS PROGRAM CONTAINS CONFIDENTIAL INFORMATION OF GENOMIC HEALTH, INC. (GHI) AND MAY ONLY 
-BE VIEWED BY PERSONS AUTHORIZED IN WRITING BY GHI. UNAUTHORIZED VIEWING OR DISCLOSURE IS 
-STRICTLY PROHIBITED AND MAY RESULT IN SERIOUS LEGAL CONSEQUENCES.
-***********************************************************************************************************************/
 /***********************************************************************************************************************
 
 Program Name           : TDRDAS.sas
@@ -45,7 +39,7 @@ Macro calls external   : None
        /* Input Specification*/    indsn=,predictorname=,estimate=,stderr=,estzero=,
        /* Analysis Parameters */   accuracy=0.001,oneminusq=0.9,lambda=0.5,
        /* Output Specification */  outdsn=, transformx=exp(x),MLBvar=MLB,RMCEstvar=RMCEst,
-       /* Graph Options*/ refinterval=.05, measure=Degree of Association, graphlabel=%str(Standardized Degree of Association of Predictor with Clinical Outcome),
+       /* Graph Options*/ refinterval=.05, measure=Degree of Association, graphlabel=%str(Standardized Degree of Association of Predictor with Outcome),
                           goutpath=, graphname=,maxpredictorsppg=150, graphcolor1=black, graphcolor2=gray
               );
 
@@ -178,7 +172,7 @@ Macro calls external   : None
 |
 | Name           : graphlabel
 | Required (Y/N) : N
-| Default Value  : Standardized Degree of Association for Predictor Expression with Recurrence
+| Default Value  : Standardized Degree of Association for Predictor with Recurrence
 | Type ($/#)     : $
 | Purpose        : This parameter allows the user to modify the label on the graph.
 |                  
@@ -190,6 +184,7 @@ Macro calls external   : None
 | Type ($/#)     : $
 | Purpose        : The path for the directory into which
 |                  the graph will be saved.
+|
 |-----------------------------------------------------------------------------------------------
 |
 | Name           : graphname
@@ -433,10 +428,10 @@ data &t..qqcorrectest;
      if Estimate < 0 then direction = -1;
      if Estimate = 0 then direction = 0;
 
-     EstCorrect = sampmeanest + ((sigmahatbeta**2) / (sigmahatbeta**2 + VarEst)) * (Estimate - sampmeanest);
-     AbsEstCorrect = abs(EstCorrect);
+     &RMCEstvar = sampmeanest + ((sigmahatbeta**2) / (sigmahatbeta**2 + VarEst)) * (Estimate - sampmeanest);
+     AbsEstCorrect = abs(&RMCEstvar);
 
-     keep &predictorname. direction EstCorrect AbsEst AbsEstCorrect;
+     keep &predictorname. direction &RMCEstvar AbsEst AbsEstCorrect;
 
      label direction = Direction of association;
 run; 
@@ -581,8 +576,6 @@ data &t..output;
       txAbsEstCorrect=AbsEstCorrect;
    %end;
 
-   &RMCEstvar.=EstCorrect;
-
    label &MLBvar. = "Maximum Absolute &measure. for Which Predictor is Included in a &oneminusq. TDRDA Set";
    label txMLB = "Transformed Maximum Absolute &measure. for Which Predictor is Included in a &oneminusq. TDRDA Set"; 
    label &RMCEstvar. = "Estimate of &measure. Corrected for Regression to the Mean";
@@ -628,7 +621,7 @@ quit;
    %if %substr(&sysver, 1,3) ne 9.1 %then %let fontsize=%sysevalf(&fontsize *0.7);
 
    proc sort data=&outdsn out=&t..grpdata;
-      by descending txMLB;
+      by descending txMLB descending TxAbsEstCorrect &predictorname;
    run;
 
    %let xmin=&estzero;
@@ -674,13 +667,13 @@ quit;
 
    %if &mindir=-1 %then %do;
       pattern1 color="&graphcolor1." ;
-      pattern3   color="&graphcolor2." ;
+      pattern3 color="&graphcolor2." ;
       pattern2 value=empty color="&graphcolor1." ;
       pattern4 value=empty color="&graphcolor2.";
    %end;
 
    %else %if &mindir=1 %then %do;
-      pattern1   color="&graphcolor2." ;
+      pattern1 color="&graphcolor2." ;
       pattern2 value=empty color="&graphcolor2.";
    %end;
   
@@ -708,6 +701,7 @@ quit;
          select &predictorname. into :predictorlist separated by '" "' from &t..subset
          where hazgrp = 9 or hazgrp = 11;         
       quit;
+ 
    
       proc gchart data=&t..subset /*anno=&t..leg*/;
          hbar &predictorname. / subgroup=hazgrp 
