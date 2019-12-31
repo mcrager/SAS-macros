@@ -140,8 +140,7 @@ Macro calls external   : None
 | Type ($/#)     : $
 | Purpose        : Transformation of the estimates to make graph more understandable.  The parameter must
 |                  include an "(x)" with no spaces between x and each parenthesis.  Everytime x appears                     
-|                  in the function, it must be encased in parentheses.  Use of this parameter will result
-|                  in 2 additional variables in the output dataset, txMLB and TxAbsEstCorrect
+|                  in the function, it must be encased in parentheses.  
 |-----------------------------------------------------------------------------------------------
 |
 | Name           : refinterval
@@ -1202,7 +1201,7 @@ data &t..varstat;
      EstZeroText = put(EstZeroMult,6.0);
      call symput('EstZeroMult',EstZeroText);
 
-**  Create macro variable for maximum estimate value for loop below;
+**  Create macro variable for maximum absolute estimate value for loop below;
 
      MaxAbsDiffEstZeroMult = int(MaxAbsDiffEstZero / &accuracy);
      MaxEstText = put(MaxAbsDiffEstZeroMult,6.0);
@@ -1212,7 +1211,7 @@ run;
 
 /*****************************************************************************************************/
 /*  Compute the regression-to-the-mean-corrected estimate of the degree of association for each      */
-/*  predictor,                                                                                       */
+/*  predictor.                                                                                       */
 /*****************************************************************************************************/
 
 data &t..correctest;
@@ -1339,7 +1338,7 @@ proc sort data=&t..correctest;
 run;
 
 
-data &outdsn;
+data &t..output;
 /***Create output data set including (transformed) MLB, (transformed) RM-corrected
     estimates, and for graphing, (transformed) RM-corrected estimate of absolute degree 
     of association and the direction of association ******/
@@ -1371,7 +1370,7 @@ data &outdsn;
    label direction = "Direction of Association";
 run;
 
-proc sort data=&outdsn;
+proc sort data=&t..output;
 %if &sortbyclass = yes %then %do;
    by &class descending txMLB descending AbsEstCorrect &predictorname;
 %end;
@@ -1380,11 +1379,14 @@ proc sort data=&outdsn;
 %end;
 run;
 
-data &outdsn;
-   set &outdsn;
-   keep &class &predictorname &MLBvar. &RMCEstvar. txMLB TxAbsEstCorrect direction; 
 
-run;
+
+proc sql noprint;
+   create table &outdsn. as
+   select &class, &predictorname., &MLBvar., &RMCEstvar., txMLB, TxAbsEstCorrect, direction
+   from &t..output;
+quit;
+
 
 /*******************************************************************************************/
 /** Produce TDRDAS graph.                                                                 **/
@@ -1446,7 +1448,6 @@ quit;
       hazgrp=hazgrp+1;
       segment=txAbsEstCorrect-txMLB;
       output;
-
    run;
 
    proc sql;
