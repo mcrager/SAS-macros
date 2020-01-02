@@ -2000,7 +2000,7 @@ put "Standardized log hazard ratio not calculated.";
      &abs_std_HR_correct. = exp(&abs_std_log_HR_correct.);
 
         label &abs_std_HR. = &lpartial. Absolute Standardized Hazard Ratio Estimate;
-        label &abs_std_HR_correct. = Bias-Corrected &lpartial. Absolute Standardized Log Hazard Ratio;
+        label &abs_std_HR_correct. = Bias-Corrected &lpartial. Absolute Standardized Hazard Ratio;
 
 %if %length(&alpha.) %then %do;
 
