@@ -197,13 +197,6 @@ Macro calls external   :
 | Purpose        : Name of output data set variable that will contain the variance error of the estimate of the 
 |                  standardized absolute log hazard ratio.
 |-----------------------------------------------------------------------------------------------
-| Name           : var_std_HR  
-| Required (Y/N) : N
-| Default Value  : var_std_HR
-| Type ($/#)     : #
-| Purpose        : Name of output data set variable that will contain the variance error of the estimate of the 
-|                  standardized absolute hazard ratio.
-|-----------------------------------------------------------------------------------------------
 | Name           : abs_std_log_HR_correct  
 | Required (Y/N) : N
 | Default Value  : abs_std_log_HR_correct
