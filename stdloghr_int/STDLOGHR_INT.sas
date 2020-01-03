@@ -203,13 +203,6 @@ Macro calls external   :
 | Purpose        : Name of output data set variable that will contain the variance error of the estimate of the 
 |                  standardized absolute log hazard ratio.
 |-----------------------------------------------------------------------------------------------
-| Name           : var_std_HR  
-| Required (Y/N) : N
-| Default Value  : var_std_HR
-| Type ($/#)     : #
-| Purpose        : Name of output data set variable that will contain the variance error of the estimate of the 
-|                  standardized absolute hazard ratio.
-|-----------------------------------------------------------------------------------------------
 | Name           : abs_std_log_HR_correct  
 | Required (Y/N) : N
 | Default Value  : abs_std_log_HR_correct
@@ -502,6 +495,11 @@ options mergenoby=nowarn;
    
    %if %length(&var_combo_indsn.) > 0 and %length(&contribution_prefix.) = 0 %then %do;
        %put  ERROR : STDLOGHR_INT macro found parameter var_combo_indsn specified but parameter contribution_prefix not specified.;
+       %abort;
+       %end;
+
+   %if %length(&var_combo_indsn.) > 0 and %length(&var_combo_indsn.) = 0 %then %do;
+       %put  ERROR : STDLOGHR_INT macro found parameter var_combo_indsn specified but parameter var_combo_indsn not specified.;
        %abort;
        %end;
 
@@ -1759,7 +1757,7 @@ run;
 
 data &t..combo_contrib;
      set &t..combo_contrib;
-     imlby = &imlby;
+     imlby = &imlby.;
 run;
 
 %end;
@@ -1811,7 +1809,7 @@ run;
 **  Build output data set for contributions of groups of variables.                *
 ***********************************************************************************/
 
-%if %length(&var_combo_indsn.) %then %do;
+%if %length(&var_combo_outdsn.) %then %do;
 
 data &var_combo_outdsn.;
     merge &t..combo_contriball &t..byvar;
@@ -2033,7 +2031,7 @@ put "Standardized log hazard ratio not calculated.";
      &abs_std_HR_correct. = exp(&abs_std_log_HR_correct.);
 
         label &abs_std_HR. = &lpartial. Absolute Standardized Hazard Ratio Estimate;
-        label &abs_std_HR_correct. = Bias-Corrected &lpartial. Absolute Standardized Log Hazard Ratio;
+        label &abs_std_HR_correct. = Bias-Corrected &lpartial. Absolute Standardized Hazard Ratio;
 
 %if %length(&alpha.) %then %do;
 
