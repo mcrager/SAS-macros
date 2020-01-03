@@ -486,6 +486,10 @@ options mergenoby=nowarn;
        %abort;
        %end;
 
+   %if %length(&var_combo_indsn.) > 0 and %length(&var_combo_indsn.) = 0 %then %do;
+       %put  ERROR :  STDLOGHR macro found parameter var_combo_indsn specified but parameter var_combo_indsn not specified.;
+       %abort;
+       %end;
   
 /*  Set default values of parameters not specified */
 
@@ -1778,7 +1782,7 @@ run;
 **  Build output data set for contributions of groups of variables.                *
 ***********************************************************************************/
 
-%if %length(&var_combo_indsn.) %then %do;
+%if %length(&var_combo_outdsn.) %then %do;
 
 data &var_combo_outdsn.;
     merge &t..combo_contriball &t..byvar;
