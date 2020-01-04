@@ -490,6 +490,12 @@ options mergenoby=nowarn;
        %put  ERROR :  STDLOGHR macro found parameter var_combo_indsn specified but parameter var_combo_indsn not specified.;
        %abort;
        %end;
+
+   %if %length(&var_combo_indsn.) > 0 and %length(&contribution_prefix.) = 0 %then %do;
+      %put  ERROR :  STDLOGHR macro found parameter var_combo_indsn set but parameter contribution_prefix not set.;
+      %abort;
+      %end;  
+
   
 /*  Set default values of parameters not specified */
 
