@@ -10,9 +10,10 @@
 
   <p>TOPICS: </p>
    &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Time_to_event">Analysis of time-to-event endpoints (survival analysis) </a> <br />
-   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Discovery analysis">Discovery analysis </a> <br />
-
-  <a  id="Time_to_event"></a> <h2>Analysis of time-to-event endpoints (survival analysis) </h2>
+   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Binary">Analysis of binary (yes/no) endpoints </a> <br />
+   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Discovery">Discovery analysis </a> <br />
+  
+  <a id="Time_to_event"></a><h2>Analysis of time-to-event endpoints (survival analysis) </h2>
 
   <h3>STDLOGHR</h3>
   <p>Starting with a data set containing individual time-to-event data with right censoring and optional weights, this macro computes the standardized log hazard ratio, a measure of strength of association with the risk of an event, from a multivariable Cox proportional hazards regression.<br />  <b>Reference:</b>  Crager MR (2012).  Generalizing the standardized hazard
@@ -28,6 +29,24 @@ ratio to multivariate proportional hazards regression, with an application to cl
   <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr_int/STDLOGHR_INT.sas">STDLOGHR_INT.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr/STDLOGHR%20User%20Guide.pdf">User guide</a>
 
+  
+  <a id="Binary"></a> <h2 >Analysis of binary (yes/no) endpoints</h2>
+
+  <h3>STDLOGOR</h3>
+  <p>Starting with a data set containing individual binary outcome data and optional weights, this macro computes the standardized log odds ratio, a measure of strength of association with the probability of the outcome, from a multivariable logistic regression.<br />  <b>Reference:</b>  Crager MR (2012).  Generalizing the standardized hazard
+ratio to multivariate proportional hazards regression, with an application to clinical~genomic studies.  <i>Journal of Applied Statistics</i> <b>39</b>:399&ndash;417.</p>
+
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr/STDLOGOR.sas">STDLOGHR.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr/STDLOGOR%20User%20Guide.pdf">User guide</a>
+
+
+  <h3>STDLOGOR_INT</h3>
+  <p>Starting with a data set containing individual binary outcome data, optional weights, and an indicator for randomized treatment, this macro computes the standardized log odds ratio for interactions of treatment (or other randomized intervention) with a set of variables from a multivariable logistic regression.</p>
+
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr_int/STDLOGHR_INT.sas">STDLOGHR_INT.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/stdloghr/STDLOGHR%20User%20Guide.pdf">User guide</a>
+
+  
   <a id="Discovery"></a><h2>Discovery analysis</h2>
 
   <h3>TDRDAS</h3>
@@ -47,4 +66,3 @@ ratio to multivariate proportional hazards regression, with an application to cl
   
 </body>
 </html>
-
