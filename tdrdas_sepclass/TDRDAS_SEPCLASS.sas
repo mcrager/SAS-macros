@@ -1,3 +1,9 @@
+/**********************************************************************************************************************
+WARNING:
+THIS PROGRAM CONTAINS CONFIDENTIAL INFORMATION OF GENOMIC HEALTH, INC. (GHI) AND MAY ONLY 
+BE VIEWED BY PERSONS AUTHORIZED IN WRITING BY GHI. UNAUTHORIZED VIEWING OR DISCLOSURE IS 
+STRICTLY PROHIBITED AND MAY RESULT IN SERIOUS LEGAL CONSEQUENCES.
+***********************************************************************************************************************/
 /***********************************************************************************************************************
 
 Program Name           : TDRDAS_SEPCLASS.sas
@@ -6,43 +12,44 @@ Path                   :
 
 Program Language       : SAS
 
-Purpose                : Given a set of predictors with estimates (and standard errors) of the numerical degree of
+Operating System       : Server
+
+Purpose                : Given a set of genes with estimates (and standard errors) of the numerical degree of
                          association of each with clinical outcome or state, TDRDAS_SEPCLASS performs a separate class 
                          true discovery rate degree of association (TDRDA) set analysis and produces an output data set
-                         containing class identifier, predictor name, the maximum lower bound (MLB) absolute degree of association
-                         for which each predictor will be included in a TDRDA set, the direction (positive or negative) of association,
+                         containing class identifier, gene name, the maximum lower bound (MLB) absolute degree of association
+                         for which each gene will be included in a TDRDA set, the direction (positive or negative) of association,
                          and a regression-to-the-mean-corrected estimate of the degree of association.  The program also produces
-                         a TDRDA bar chart showing the MLB and RM-corrected estimates for all identified predictors.  At the user's 
+                         a TDRDA bar chart showing the MLB and RM-corrected estimates for all identified genes.  At the user's 
                          option, this bar chart may be sorted by class or not.
                          
 Notes                  : 
 
-Validated              : Tested and verified
+Status                 : Tested and verified
 
 Run Dependencies       :  None
 
-Input Datasets/Views   : Specified SAS data set indsn containing predictor name, class identifier, estimate of degree of association (such as log hazard ratio
+Input Datasets/Views   : Specified SAS data set indsn containing gene name, class identifier, estimate of degree of association (such as log hazard ratio
                          or log odds ratio), and standard error of the estimate.
 
-Output Datasets/Views  : Specified SAS data set outdsn containing maximum absolute association for which each predictor will be included in a TDRDA
+Output Datasets/Views  : Specified SAS data set outdsn containing maximum absolute association for which each gene will be included in a TDRDA
                          set, direction of association, and a regression-to-the-mean-corrected estimate of the degree of association
                          
 
-Other Output           : A graph saved as a PNG file containing a bar chart of the results.  Multiple graphs will be produced if the number
-                         of associated predictors exceeds 150.
+Other Output           : A graph saved as an png file containing a bar chart of the results.  Multiple graphs will be produced if the number
+                         of associated genes exceeds 150.
 
-Macro calls internal   : Tmp_SubLibL, SEPCLASS_THETA
+Macro calls internal   : None
 
-Macro calls external   : None
+Macro calls external   : SEPCLASS_THETA
 
 ***********************************************************************************************************************/
 %macro TDRDAS_SEPCLASS(
-       /* Input Specification*/    indsn=,predictorname=,class=,estimate=,stderr=,estzero=,
+       /* Input Specification*/    indsn=,genename=,class=,estimate=,stderr=,estzero=,
        /* Analysis Parameters */   accuracy=0.001,oneminusq=0.9,lambda=0.5,
        /* Output Specification */  outdsn=, transformx=exp(x),MLBvar=MLB,RMCEstvar=RMCEst,
-       /* Graph Options*/ refinterval=.05, measure=Degree of Association, graphlabel=%str(Standardized Degree of Association of Predictor with Outcome),
-                          goutpath=, graphname=,maxpredictorsppg=150, graphcolor1=black, graphcolor2=gray,sortbyclass=yes,
-                          class_value_graphname=
+       /* Graph Options*/ refinterval=.05, measure=Degree of Association, graphlabel=%str(Standardized Degree of Association of Gene Expression with Clinical Outcome),
+                          goutpath=, graphname=TDRDAS,maxgenesppg=150, graphcolor1=black, graphcolor2=gray,sortbyclass=yes
               );
 
 /***********************************************************************************************
@@ -56,11 +63,11 @@ Macro calls external   : None
 |
 |-----------------------------------------------------------------------------------------------
 |
-| Name           : predictorname
+| Name           : genename
 | Required (Y/N) : Y
 | Default Value  :
 | Type ($/#)     : $
-| Purpose        : Name of variable that contains predictor names 
+| Purpose        : Name of variable that contains gene names 
 |
 |-----------------------------------------------------------------------------------------------
 |
@@ -140,7 +147,9 @@ Macro calls external   : None
 | Type ($/#)     : $
 | Purpose        : Transformation of the estimates to make graph more understandable.  The parameter must
 |                  include an "(x)" with no spaces between x and each parenthesis.  Everytime x appears                     
-|                  in the function, it must be encased in parentheses.  
+|                  in the function, it must be encased in parentheses.  Use of this parameter will result
+|                  in 2 additional variables in the output dataset, txMLB and TxAbsEstCorrect
+|
 |-----------------------------------------------------------------------------------------------
 |
 | Name           : refinterval
@@ -183,7 +192,7 @@ Macro calls external   : None
 |
 | Name           : graphlabel
 | Required (Y/N) : N
-| Default Value  : Standardized Degree of Association for Predictor with Recurrence
+| Default Value  : Standardized Degree of Association for Gene Expression with Recurrence
 | Type ($/#)     : $
 | Purpose        : This parameter allows the user to modify the label on the graph.
 |                  
@@ -193,9 +202,8 @@ Macro calls external   : None
 | Required (Y/N) : Y if graphname specified.
 | Default Value  : .
 | Type ($/#)     : $
-| Purpose        : The path for the directory into which
+| Purpose        : The full path (excluding the final '\' and filename) for the directory into which
 |                  the graph will be saved.
-|
 |-----------------------------------------------------------------------------------------------
 |
 | Name           : graphname
@@ -206,21 +214,19 @@ Macro calls external   : None
 |                  value as a file name.  The file extension will be added by the macro.
 |
 |-----------------------------------------------------------------------------------------------
-|
-| Name           : maxpredictorsppg
+| Name           : maxgenesppg
 | Required (Y/N) : N
 | Default Value  : 150
 | Type ($/#)     : #
-| Purpose        : The maximum number of predictors to be shown on each graph. The value selected should be in 
+| Purpose        : The maximum number of genes to be shown on each graph. The value selected should be in 
 |                  the range of 1-150. 
 |
 |----------------------------------------------------------------------------------------------- 
-|
 | Name           : graphcolor1
 | Required (Y/N) : N
 | Default Value  : black
 | Type ($/#)     : $
-| Purpose        : The color of the bars on the graph representing the predictors with negative association.  
+| Purpose        : The color of the bars on the graph representing the genes with negative association.  
 | 
 |-----------------------------------------------------------------------------------------------
 |
@@ -228,7 +234,8 @@ Macro calls external   : None
 | Required (Y/N) : N
 | Default Value  : gray
 | Type ($/#)     : $
-| Purpose        : The color of the bars on the graph representing the predictors with positive association.  
+| Purpose        : The color of the bars on the graph representing the genes with positive association.  
+|
 |-----------------------------------------------------------------------------------------------
 |
 | Name           : sortbyclass
@@ -239,47 +246,26 @@ Macro calls external   : None
 |                  by MLB and RM-corrected estimate.  If no, the TDRDA set bar chart is sorted only by 
 |                  MLB and RM-corrected estimate.
 |
-|-----------------------------------------------------------------------------------------------
-|
-| Name           : class_value_graphname
-| Required (Y/N) : N
-| Default Value  : 
-| Type ($/#)     : $
-| Purpose        : Optional filename of graph of logistic regression estimates of class probabilities
-|                  given z-score values.  These plots can be useful to make sure the cubic spline fit is reasonable,
-|                  and to show which classes are enriched for truly associated genes.  Also, the slope of the fitted lines
-|                  should be close to zero around z=0.  A substantial departure from this indicates that the null 
-|                  distribution of the test statistic is not the same across classes, which suggests a possible study design 
-|                  or conduct issue.  If this parameter is not specified, no graph is produced.
-|
 **********************************************************************************************************/;
-
- %local t EstZeroMult MaxEstMult fontsize numpages maxpredictorsppg j flag legendlocation xmax firstobs obs
-        npredictor k vartype maxlength;
-
-
-%macro Tmp_SubLibL(tmplib=);
-
-   %local temp;
- 
-   %let workpath=%sysfunc(pathname(WORK));
- 
-   %let temp = %trim(%bquote(&workpath.))\%left(&tmplib.);
-   
-   %if %sysfunc(fileexist(&temp.)) = 0 %then %do;
-      systask command "mkdir ""&temp.""" wait;
-   %end;
-   %if %sysfunc(libref(&tmplib.)) %then %do;
-      libname &tmplib. "&temp." filelockwait=60;
-   %end;
-
-%mend Tmp_SubLibL;
+/**********************************************************************************************************
+Mod#    Date         Username    Test     Description
+---     -------      --------    ----    -----------------------------------------------------------
+000     20091214     mcrager
+001     20101012     mcrager     1-4     Determine maximum length of variable &genename dynamically and
+                                         Substitute where” clause to prevent duplicate records in graph
+002     20200310     mcrager             Add checks for user error in specifying input parameters.  Ensure
+                                         that graphs will not be obscured by a row label variable with a large
+                                         length.  Automatically set mergenoby option before executing
+                                         and reset it to the existing value at end of macro execution.
+**********************************************************************************************************/;
+ %local t EstZeroMult MaxEstMult fontsize numpages maxgenesppg j flag legendlocation xmax firstobs obs
+        ngene k vartype maxlength;
 
 /* Generate a subdir at &workspace for any temp dataset.*/
 
    %let t = _tdrdasc;
    
-   %Tmp_SubLibL(tmplib=&t.);
+   %Tmp_SubLib(tmplib=&t.);
 
 /*  Capture status of mergenoby option so it can be reset to its current value at the end of the macro */
 
@@ -293,707 +279,6 @@ quit;
 
 options mergenoby=nowarn;
 
-
-
-/***********************************************************************************************************************/
-
-%macro sepclass_theta(
-       /* Input Specification*/    indsn=,predictorname=,class=,estimate=,stderr=,pvalue=,direction=,
-       /* Analysis Parameters */   lambda=0.5,theta=,
-       /* Output Specification */  outdsn=,overallq=,sepclassq=,p0class=,
-                                   goutpath=, class_value_graphname=
-              );
-
-%let trace = *;  /* Trace variables to debug */
-
-%local classname1 classname2 classname3 classname4 classname5 classname6 classname7;
-
-/************************************************************************/
-/*  Count number of genes and number of classes in data set             */
-/************************************************************************/
-
-proc sql noprint;
-    select count(distinct &predictorname) into :ngene from &indsn;
-quit; 
-run;
-
-proc sql noprint;
-    select count(distinct &class) into :k from &indsn;
-quit;
-run;
-
-%let k = %left(&k);
-
-%if &k = 1 %then %do;
-      %put ERROR: GHI Note: SEPCLASS macro found only 1 class (variable &class) in data set &indsn..;
-      %abort;
-   %end;
-
-/************************************************************************/
-/*  Create numerical class variable and determine proportion of genes   */
-/*  in each class.                                                      */
-/************************************************************************/
-
-%let dsid=%sysfunc(open(&indsn,is));
-%let varid=%sysfunc(varnum(&dsid,&class));
-%let vartyp=%sysfunc(vartype(&dsid,&varid));
-%if &dsid>0 %then %let zclose=%sysfunc(close(&dsid));
-
-data &t..indata;
-      set &indsn;
-      a = 1;   /*  Dummy variable for merges  */
-run;
-
-/************************************************************************/
-/*  Compute q-values for the overall analysis (ignoring classes)        */
-/************************************************************************/
-
-proc sort data=&t..indata;
-     by &pvalue;
-run;
-
-/* Estimate pi0, the proportion of interval hypotheses that truly satisfy the 
-   interval null hypothesis */
-
-data &t..pi0;
-
-   set &t..indata end=eof;
-
-   if &pvalue >  &lambda then w = w + 1;
-
-   if eof then do;
-       pi0 = min(1,w / ((1-&lambda)*&ngene));  
-       output;
-       end;
-
-   keep pi0 a;
-   retain w 0;
-   run;
-
-data &t..combine;
-    merge &t..indata &t..pi0;
-    by a;
-
-    count = count + increment;
-    if &pvalue = 1 then increment = 0; /*  Account for p-values equal to 1 by
-                                           setting all empirical CDF values to
-                                           the same (conservative) value of 
-                                           (m - #(p=1) + 1) / m.  */
-    empcdf = count / &ngene;  
-
-    q_overall = pi0 * &pvalue / empcdf;
-
-    retain count 0 increment 1;
-    run;
-
-/************************************************************************/
-/*  Now compute the modification factors to get the separate class      */
-/*  q-values.  Transform the p-values to z-values, accounting for       */
-/*  direction of the estimated association.  Then model the probability */
-/*  that the observation came from each class using a logistic          */
-/*  regression applied to the nominal classes with a cubic spline of    */
-/*  the z-statistic as the predictor variables.                         */
-/************************************************************************/
-      
-data &t..combine;
-     set &t..combine;
-
-     zplus  = ( &estimate - &theta) / &stderr;
-     zminus = (-&estimate - &theta) / &stderr;
-         
-     if estimate >  &theta then zvalue =  zplus;  else
-     if estimate < -&theta then zvalue = -zminus; else
-                                zvalue =  0;
-     abszvalue = abs(zvalue);          
-run;
-
-/*************************************************************************/
-/* Determine minimum, maximum, .25, .50, and .75 quantiles of zplus      */
-/* and zminus and compute the natural cubic spline basis function values.*/             
-/*************************************************************************/
-
-proc univariate data=&t..combine noprint;
-     var zplus zminus;
-     by a;
-     output out=&t..zquant min    = zplusmin zminusmin
-                           q1     = zplusq1  zminusq1
-                           median = zplusq2  zminusq2
-                           q3     = zplusq3  zminusq3
-                           max    = zplusmax zminusmax;
-run;
-
-&trace. proc print data=&t..zquant;
-&trace. title2 data set &t..zquant;
-&trace. run;
-
-/***********************************************************************************************/
-%macro natspline5(var=,knot1=,knot2=,knot3=,knot4=,knot5=,
-                       basis1=,basis2=,basis3=,basis4=);
-
-/*  Macro to compute 4 df natural spline basis function values
-
-**  Parameters:
-**  var = Name of variable containing covariate value
-**  knot1-knot5 = Positions of the 4 knots
-**  basis1-basis4 = Names of variables that will contain the basis function values
-*/
-
-    qqlambda2 = (&knot5. - &knot2.) / (&knot5. - &knot1.);
-    qqlambda3 = (&knot5. - &knot3.) / (&knot5. - &knot1.);
-    qqlambda4 = (&knot5. - &knot4.) / (&knot5. - &knot1.); 
-   
-    &basis1 = &var;
-    &basis2 = max(0,(&var.-&knot2.)**3) - qqlambda2*max(0,(&var.-&knot1.)**3) - (1-qqlambda2)*max(0,(&var.-&knot5.)**3);
-    &basis3 = max(0,(&var.-&knot3.)**3) - qqlambda3*max(0,(&var.-&knot1.)**3) - (1-qqlambda3)*max(0,(&var.-&knot5.)**3);
-    &basis4 = max(0,(&var.-&knot4.)**3) - qqlambda4*max(0,(&var.-&knot1.)**3) - (1-qqlambda4)*max(0,(&var.-&knot5.)**3);
-
-    drop qqlambda2 qqlambda3 qqlambda3 qqlambda4;
-
-%mend natspline5;
-/***************************************************************************************************/
-
-data &t..combine;
-     merge &t..combine end=eof &t..zquant;
-     by a;
-
-**  Compute 4 df natural spline basis function values for the zplus and zminus scores;
-
-     %natspline5(var=zplus,knot1=zplusmin,knot2=zplusq1,knot3=zplusq2,knot4=zplusq3,knot5=zplusmax,
-                            basis1=zplusb1,basis2=zplusb2,basis3=zplusb3,basis4=zplusb4);
-
-     %natspline5(var=zminus,knot1=zminusmin,knot2=zminusq1,knot3=zminusq2,knot4=zminusq3,knot5=zminusmax,
-                            basis1=zminusb1,basis2=zminusb2,basis3=zminusb3,basis4=zminusb4);
-
-     zeroflag = 0;
-     output;
-
-     if eof then do;
-
-**  Output an extra observation with z-score of exactly 0 and missing class variable.  This
-**  observation will be used in estimating the class probabilities at zero.  It does not affect
-**  the model fit.;
-
-          zeroflag = 1;
-          zplus = 0;
-          zvalue = 0;
- 
-    %natspline5(var=zplus,knot1=zplusmin,knot2=zplusq1,knot3=zplusq2,knot4=zplusq3,knot5=zplusmax,
-                            basis1=zplusb1,basis2=zplusb2,basis3=zplusb3,basis4=zplusb4);
-
-    %natspline5(var=zminus,knot1=zminusmin,knot2=zminusq1,knot3=zminusq2,knot4=zminusq3,knot5=zminusmax,
-                            basis1=zminusb1,basis2=zminusb2,basis3=zminusb3,basis4=zminusb4);
-
-          nclass = .;
-          output;
-          end;   
-run;
-
-&trace. proc print data=&t..combine;
-&trace. title2 Data set &t..combine ready for logistic regression;
-&trace. run;
-
-/************************************************************************/
-/* Run logistic regression for zplus and zminus scores                  */
-/************************************************************************/
-
-proc logistic data=&t..combine noprint;
-      model nclass = zplusb1 zplusb2 zplusb3 zplusb4 / link=glogit; 
-      output out=&t..logoutplus predprobs=individual;
-run;
-
-proc sort data=&t..logoutplus;
-      by &predictorname;
-run;
-
-data &t..logoutplus;
-     array ip(&k) ip_1-ip_&k;
-     array PAplus(&k) PAplus1-PAplus&k;
-
-     set &t..logoutplus;
-  
-     do i = 1 to &k;
-        PAplus(i) = ip(i);
-        end;
- 
-     drop i;
-run;
-     
-&trace. proc print data=&t..logoutplus;
-&trace. title data set logoutplus;
-&trace. run;
-
-proc logistic data=&t..combine noprint;
-      model nclass = zminusb1 zminusb2 zminusb3 zminusb4 / link=glogit; 
-      output out=&t..logoutminus predprobs=individual;
-run;
-
-proc sort data=&t..logoutminus;
-      by &predictorname;
-run;
-
-data &t..logoutminus;
-     array ip(&k) ip_1-ip_&k;
-     array PAminus(&k) PAminus1-PAminus&k;
-
-     set &t..logoutminus;
-  
-     do i = 1 to &k;
-        PAminus(i) = ip(i);
-        end;
- 
-     drop i;
-run;
-
-&trace. proc print data=&t..logoutminus;
-&trace. title data set logoutminus;
-&trace. run;
-
-/************************************************************************/
-/* Compute the mixture estimates using the zplus and zminus estimates   */
-/************************************************************************/
-
-data &t..logout;
-      array PAplus(&k)  PAplus1-PAplus&k;
-      array PAminus(&k) PAminus1-PAminus&k;
-      array PAmix(&k)   PAmix1-PAmix&k;
-
-
-      merge &t..logoutplus &t..logoutminus;
-      by &predictorname;
-
-      if zeroflag = 0 then do;
-         wplus = CDF('NORMAL',estimate/stderr,0,1);
-         do i = 1 to &k;
-            PAmix(i) = wplus * PAplus(i)  +  (1-wplus) * PAminus(i);
-            end;
-         end;
-                      else do;
- /*  Calculate the estimate to use if no association estimates are in [-theta,theta].   */
-         do i = 1 to &k;
-            PAmix(i) = 0.5 * PAplus(i) + 0.5 * PAminus(i);            
-            end;
-         zvalue = 0;
-         end;
-  
-       drop i ip_1-ip_&k;
-run;
-
-&trace. proc print data=&t..logout;
-&trace. title2 data set &t..logout;
-&trace. run;
-
-/****************************************************************************************/
-/* Capture the proportions of observations in each class.                               */
-/****************************************************************************************/
-
-proc sort data=&indsn out=&t..Allz nodupkeys;
-     by nclass;
-run;
-
-data &t..Allz;
-      array Allzclassprop(&k) Allzclassprop1-Allzclassprop&k;
-      set &t..Allz end=eof;
-      a = 1;
-      Allzclassprop(nclass) = classprop;
-      if eof then output;
-      keep Allzclassprop1-Allzclassprop&k a;
-run;
-
-/************************************************************************
-** Using predicted probabilities from logistic regression models, estimate
-** the conditional probabilities of the various classes given |Z|>=z.     
-*************************************************************************/
-
-/************************************************************************
-** Start with left tail probabilities
-************************************************************************/
-
-proc sort data=&t..logout;
-     by zvalue;
-run;
-
-data &t..lefttail (keep = zvalueleft abszvalue zprobleft condprobleft1-condprobleft&k a);
- 
-     array pclass(&k) PAmix1-PAmix&k;
-     array lagpclass(&k) lagpclass1-lagpclass&k;
-     array runtotleft(&k) runtotleft1-runtotleft&k;
-     array condprobleft(&k) condprobleft1-condprobleft&k;
-
-     set &t..logout;
-     where zeroflag = 0;  * Do not include the added dummy observation with z = 0;
-     
-     zvalueleft = zvalue;  /* A non-missing value for this variable will indicate that     */
-                           /* that there is a contribution from the left (negative) side   */
-                           /* when combining the left and right sides later on.            */
-     abszvalue = abs(zvalue);
-     nleft = nleft + 1;
-     zprobleft = nleft / &ngene;
-
-     if zvalue <= 0 then do;
-        do k = 1 to &k;
-          runtotleft(k) = runtotleft(k) + pclass(k) / &ngene;
-          condprobleft(k) = runtotleft(k) / zprobleft;
-          end;
-        output;
-        end;
-
-      retain runtotleft1-runtotleft&k 0 nleft 0;
-run;
-
-&trace. proc print data=&t..lefttail;
-&trace. title data set lefttail;
-&trace. run;
-
-/************************************************************************
-** Now do the right tail probabilities
-************************************************************************/
-
-proc sort data=&t..logout;
-      by descending zvalue;
-run;
-
-data &t..righttail (keep = zvalueright abszvalue zprobright condprobright1-condprobright&k. a);
-     array pclass(&k) PAmix1-PAmix&k;
-     array lagpclass(&k) lagpclass1-lagpclass&k;
-     array runtotright(&k) runtotright1-runtotright&k;
-     array condprobright(&k) condprobright1-condprobright&k;
-
-     set &t..logout;
-     where zeroflag = 0;  * Do not include the added dummy observation with z = 0;
-     
-     zvalueright = zvalue;  /* A non-missing value for this variable will indicate that     */
-                            /* that there is a contribution from the left (negative) side   */
-                            /* when combining the left and right sides later on.            */
-
-     abszvalue = abs(zvalue);
-     nright = nright + 1;
-     zprobright = nright / &ngene;
-
-     if zvalue >  0 then do;
-        do k = 1 to &k;
-          runtotright(k) = runtotright(k) + pclass(k) / &ngene;
-          condprobright(k) = runtotright(k) / zprobright;
-          end;
-        output &t..righttail;
-        end;
-     
-      retain runtotright1-runtotright&k 0 nright 0;
-run;
-
-&trace. proc print data=&t..righttail;
-&trace. title data set righttail;
-&trace. run;
-
-
-/************************************************************************
-** Combine left tail and right tail conditional probabilities to get probabilities of each
-** class conditional on absolute value of Z>=z
-************************************************************************/
-
-proc sort data=&t..lefttail;
-     by descending abszvalue;
-run;
-
-proc sort data=&t..righttail;
-     by descending abszvalue;
-run;
-
-data &t..bothtail;
-
-     array condprobright(&k) condprobright1-condprobright&k;
-     array condprobleft(&k) condprobleft1-condprobleft&k;
-     array condprob(&k) condprob1-condprob&k;
-
-     array cpl(&k) cpl1-cpl&k;
-     array cpr(&k) cpr1-cpr&k; 
-
-     merge &t..lefttail &t..righttail;
-     by descending abszvalue;
-
-     if zvalueleft ne . then do;
-        do k = 1 to &k;
-           cpl(k) = condprobleft(k);
-           end;
-        zpl = zprobleft;
-        end;
-
-     if zvalueright ne . then do;
-        do k = 1 to &k;
-           cpr(k) = condprobright(k);
-           end;
-        zpr = zprobright;
-        end;
-
-    do k = 1 to &k;
-        condprob(k) = (zpl * cpl(k) + zpr * cpr(k)) / (zpl + zpr);
-        end;
-
-    retain zpl 0 cpl1-cpl&k 0
-           zpr 0 cpr1-cpr&k 0;
-run;
-
-&trace. proc print data=&t..bothtail;
-&trace. title data set bothtail;
-&trace. run;
-
-/***********************************************************************************/
-/** If the Z statistic is 0, then we are conditioning on an event with probability */
-/** 1, so just use the observed class proportions for the conditional probabilities*/
-/***********************************************************************************/
-
-data &t..bothtail;
-     array Allzclassprop(&k) Allzclassprop1-Allzclassprop&k;
-     array condprob(&k) condprob1-condprob&k;
-
-     merge &t..bothtail &t..Allz;
-     by a;
-
-    if abszvalue = 0 then do k = 1 to &k;
-      condprob(k) = Allzclassprop(k);
-      end;
-run;   
-
-/************************************************************************
-**  Merge the conditional probabilities with the p-value data set
-************************************************************************/
-
-proc sort data=&t..combine;
-     by descending abszvalue;
-run;
-
-data &t..combine;
-
-     array condprobright(&k) condprobright1-condprobright&k;
-     array condprobleft(&k) condprobleft1-condprobleft&k;
-     array condprob(&k) condprob1-condprob&k;
-
-     merge &t..combine  &t..bothtail ;
-     by descending abszvalue;
-run;
-
-/************************************************************************
-**  Get the class probability estimates for estimates that are less than 
-**  or equal to theta in absolute value (estimated class probabilities
-**  for the null genes)
-************************************************************************/     
-
-/*====take out tcount*/
-data &t..zero (keep = pclasszero1-pclasszero&k tcount a); 
-     array pclass(&k) PAmix1-PAmix&k;
-     array sumpclass(&k) sumpclass1-sumpclass&k;
-     array pclasszero(&k) pclasszero1-pclasszero&k;
-     array zeroest(&k) zeroest1-zeroest&k;
-
-     set &t..logout  end=eof;
-
-     if zeroflag = 0 and abs(estimate) <= &theta then do;
-       tcount = tcount + 1;
-       do k = 1 to &k;
-           sumpclass(k) = sumpclass(k) + pclass(k);
-           end;
-       end;
-
-     if zeroflag = 1 then do k = 1 to &k;
-  /*  Pick up the default estimate in case there */
-  /*  are no estimates in the range [-theta,+theta] */
-          zeroest(k) = pclass(k);
-          end;
-
-     if eof then do;
-       if tcount > 0 then do k = 1 to &k;
-          pclasszero(k) = sumpclass(k) / tcount;
-          end;
-                     else do k = 1 to &k;
-          pclasszero(k) = zeroest(k);
-          end;
-       output;
-       end;
-
-     drop k;
-                            
-     retain sumpclass1-sumpclass&k tcount 0 zeroest1-zeroest&k;    
-run;
-
-
-&trace. proc print data=&t..zero;
-&trace. title data set zero;
-&trace. run;
-
-/************************************************************************
-**  Merge in the estimated class probabilities for the null genes and compute
-**  the separate class analysis q-values
-************************************************************************/
-
-data &t..sepclass;
-
-     array condprob(&k) condprob1-condprob&k;
-     array pclasszero(&k) pclasszero1-pclasszero&k;
-     
-     merge &t..combine  &t..zero;
-     by a;
-     
-     if zeroflag = 1 then delete;  /* Get rid of extra observation at z=0 */
-
-** Compute separate class q-value;
-     
-     q_sepclass = q_overall * pclasszero(nclass) / condprob(nclass);
-
-%if %length(&p0class.)>0 %then %do;
-** Compute estimate of truly null hypotheses in each class;
-     p0class = pclasszero(nclass) * pi0 / classprop;
-     label p0class = Estimated proportion of truly null hypotheses in class;
-%end;
-
-run;    
-      
-
-*proc print data=&t..sepclass;
-*     title data set sepclass;
-*run;
-
-/************************************************************************
-**  Put together output data set
-************************************************************************/
-
-data &outdsn;
-      set &t..sepclass;
-
-      &overallq = min(q_overall,1);
-      label &overallq = Overall (ignoring classes) q-value;
-      
-      &sepclassq = min(q_sepclass,1);
-      label &sepclassq = Separate class analysis q-value;
-
-%if %length(&p0class.)>0 %then %do;
-      keep &predictorname &class &pvalue &overallq &sepclassq &p0class &theta;
-%end;                   
-                          %else %do;
-      keep &predictorname &class &pvalue &overallq &sepclassq &theta;
-%end;      
-run;
-
-proc sort data=&outdsn;
-      by &class &sepclassq;
-run;
-
-%if %length(&class_value_graphname.)>0 %then %do;
-
-/************************************************************************
-**  Plot the estimated logistic regression estimates of the class        
-**  probabilities for the user to check.
-************************************************************************/
-
-/***********************************************************************/
-/**  First, get class names for legend                                 */
-/***********************************************************************/
-
-proc sort data=&t..indata out=&t..legendkey (keep = nclass &class) nodupkeys;
-    by nclass;
-run;
-
-data &t..legendkey;
-
-%if &vartyp=N %then %do;
-     array qqclassname(&k) qqclassname1-qqclassname&k;
-%end;
-%if &vartyp=C %then %do;
-     array qqclassname(&k) $ qqclassname1-qqclassname&k;
-%end;
-
-    set &t..legendkey end=eof;
-    
-    qqclassname(nclass) = &class;
-    a = 1;
-    if eof then output;
-   
-    retain qqclassname1-qqclassname&k;
-    keep   qqclassname1-qqclassname&k a;
-run;
-
-data &t..legendkey;
-
-%if &vartyp=N %then %do;
-     array qqclassname(&k) qqclassname1-qqclassname&k;
-%end;
-%if &vartyp=C %then %do;
-     array qqclassname(&k) $ qqclassname1-qqclassname&k;
-%end;
-
-    set &t..legendkey;
-
-%if &vartyp=N %then %do i = 1 %to &k;
-call symput("classname&i.",trim(left(put(qqclassname(&i),best.))));
-%end; 
-
-%if &vartyp=C %then %do i = 1 %to &k;
-call symput("classname&i.",trim(left(qqclassname(&i))));
-%end; 
-
-run;
-
-
-data &t..forplot;
-
-     array pclasszero(&k) pclasszero1-pclasszero&k;
-     array PAmix(&k) PAmix1-PAmix&k;
-
-%if &vartyp=N %then %do;
-     array qqclassname(&k) qqclassname1-qqclassname&k;
-%end;
-%if &vartyp=C %then %do;
-     array qqclassname(&k) $ qqclassname1-qqclassname&k;
-%end;
-
-    merge &t..logout &t..legendkey &t..zero;
-    by a;
-
-/***  Get rid of added observation with z = 0  ***/
-    if nclass = . then delete;  
-    
-/***  Plot the interval null hypothesis class probability estimates ***/
-/***  for the plot at Z=0.                                          ***/
-    if zvalue = 0 then do k = 1 to &k;
-        PAmix(k) = pclasszero(k);
-        end;
-
-%do i = 1 %to &k;
-    label PAmix&i = "Pr{Class=&&classname&i|Z score}";
-%end;
-
-     drop k;
-run;
-
-/********************************************************************************/
-/**  Now generate the plot                                                      */
-/********************************************************************************/     
-
-filename gout "&goutpath.\&class_value_graphname..PNG";
- 
-goptions reset=all  
-    device=PNG
-    ftext="Arial Rounded MT Bold"
-    htext=10 pt
-    gsfmode=replace
-    gsfname=gout;
-
-axis1 label=("Z Score");
-axis2 label=("Probability" position=top justify=right);
-legend1 label=NONE;
-     
-proc gplot data=&t..forplot;
-    plot (PAmix1-PAmix&k) * zvalue / overlay legend=legend1 href=0
-                                     haxis=axis1 vaxis=axis2;
-run; 
-
-%end;
-
-%mend sepclass_theta;
-
-/**********************************************************************************************
-**  Main macro.                                                                               *
-**********************************************************************************************/
-
-
 /**********************************************************************************************
 **  Set default values of parameters not specified.                                           *
 **********************************************************************************************/
@@ -1004,58 +289,57 @@ run;
 %if %length(&transformx.) = 0 %then %let transformx = exp(x);
 %if %length(&MLBvar.) = 0 %then %let MLBvar = MLB;
 %if %length(&RMCEstvar.) = 0 %then %let RMCEstvar = RMCEst;
-%if %length(&measure.) = 0 %then %let measure = Degree of Association;
-%if %length(&graphlabel.) = 0 %then %let graphlabel = Standardized Degree of Association of Predictor with Outcome;
-%if %length(&maxpredictorsppg.) = 0 %then %let maxpredictorsppg = 150;
+%if %length(&refinterval.) = 0 %then %let refinterval = 0.05;
+%if %length(&measure.) = 0 %then %let measure = Standardized Degree of Association;
+%if %length(&graphlabel.) = 0 %then %let graphlabel = Standardized Degree of Association of Gene Expression with Clinical Outcome;
+%if %length(&maxgenesppg.) = 0 %then %let maxgenesppg = 150;
 %if %length(&graphcolor1.) = 0 %then %let graphcolor1 = black;
 %if %length(&graphcolor2.) = 0 %then %let graphcolor2 = gray;
+%if %length(&sortbyclass.) = 0 %then %let sortbyclass = yes;
 
-
-/**********************************************************************************************
-**  Check for errors in macro parameter specification.                                        *
-**********************************************************************************************/
+/* Check for errors in macro parameter specification */
 
    %if %length(&estzero.)=0 %then %do;
-      %put ERROR : TDRDAS_SEPCLASS macro parameter estzero must be specified.;
+      %put ERROR : GHI Note: TDRDAS_SEPCLASS macro parameter estzero must be specified.;
       %abort;
    %end;
 
    %if %sysfunc(sign(&lambda.))=-1 %then %do;
-      %put ERROR : TDRDAS_SEPCLASS macro parameter lambda must be >=0 and <1.;
+      %put ERROR: GHI Note: TDRDAS_SEPCLASS macro parameter lambda must be >=0 and <1.;
       %abort;
    %end;
 
    %if %sysevalf(&lambda. < 0) or %eval(&lambda >= 1) %then %do;
-      %put ERROR : TDRDAS_SEPCLASS macro parameter lambda must be >=0 and <1.;
+      %put ERROR: GHI Note: TDRDAS_SEPCLASS macro parameter lambda must be >=0 and <1.;
       %abort;
    %end;
 
    %if %sysevalf(&lambda. < 0.2) or %sysevalf(&lambda > 0.8) %then %do;
-      %put WARNING : TDRDAS_SEPCLASS macro parameter lambda is set at &lambda.  Lambda of 0.5 may perform better.;
+      %put WARNING: GHI Note: TDRDAS_SEPCLASS macro parameter lambda is set at &lambda.  Lambda of 0.5 may perform better.;
    %end;
 
    %if %sysfunc(sign(&oneminusq.))=-1 %then %do;
-      %put ERROR : TDRDAS_SEPCLASS macro parameter oneminusq must be >0 and <1.;
+      %put ERROR: GHI Note: TDRDAS_SEPCLASS macro parameter oneminusq must be >0 and <1.;
       %abort;
    %end;
  
    %if %sysevalf(&oneminusq. <= 0) or %sysevalf(&oneminusq >= 1) %then %do;
-      %put ERROR :TDRDAS_SEPCLASS macro parameter oneminusq must be >0 and <1.;
+      %put ERROR: GHI Note: TDRDAS_SEPCLASS macro parameter oneminusq must be >0 and <1.;
       %abort;
    %end;
 
    %if %sysevalf(&accuracy. <= 0) %then %do;
-      %put ERROR :  TDRDAS_SEPCLASS macro parameter accuracy must be >0.;
-      %abort;
-   %end;
-
-   %if %length(&graphname.) > 0 and %length(&goutpath.) = 0 %then %do;
-      %put ERROR :  TDRDAS_SEPCLASS macro:  specification of parameter goutpath is required when parameter graphname is specified.;
+      %put ERROR: GHI Note: TDRDAS_SEPCLASS macro parameter accuracy must be >0.;
       %abort;
    %end;
 
    %if %length(&class.)=0 %then %do;
-      %put ERROR :  TDRDAS_SEPCLASS macro parameter class must be specified.;
+      %put ERROR : GHI Note: TDRDAS_SEPCLASS macro parameter class must be specified.;
+      %abort;
+   %end;
+
+   %if %length(&graphname.) > 0 and %length(&goutpath.) = 0 %then %do;
+      %put ERROR : GHI Note: TDRDAS macro:  specification of parameter goutpath is required when parameter graphname is specified.;
       %abort;
    %end;
 
@@ -1070,8 +354,8 @@ run;
      %abort;
      %end;
    %else %do;
-     %if %sysfunc(varnum(&dsid.,&predictorname.)) = 0 %then %do;
-            %put ERROR : TDRDAS_SEPCLASS macro input data set &indsn. does not contain the variable &predictorname. specified in parameter predictorname.;
+     %if %sysfunc(varnum(&dsid.,&genename.)) = 0 %then %do;
+            %put ERROR : TDRDAS_SEPCLASS macro input data set &indsn. does not contain the variable &genename. specified in parameter genename.;
             %let errcode = 1;
             %end;
      %if %sysfunc(varnum(&dsid.,&estimate.)) = 0 %then %do;
@@ -1091,13 +375,12 @@ run;
      %if &errcode. = 1 %then %abort;
      %end;
 
-
 /************************************************************************/
-/*  Count number of predictors and number of classes in data set.       */
+/*  Count number of genes and number of classes in data set             */
 /************************************************************************/
 
 proc sql noprint;
-    select count(distinct &predictorname) into :npredictor from &indsn;
+    select count(distinct &genename) into :ngene from &indsn;
 quit; 
 run;
 
@@ -1115,7 +398,7 @@ run;
 
 /************************************************************************/
 /*  Capture required statistics from input data set.  Create numerical  */
-/*   class variable and determine proportion of predictors in each class.    */
+/*   class variable and determine proportion of genes in each class.    */
 /************************************************************************/
 
 %let dsid=%sysfunc(open(&indsn,is));
@@ -1133,7 +416,7 @@ data &t..allest;
 
     dummyby = 1;  *  Dummy variable for merges;
 
-    keep Estimate StdErr VarEst AbsDiffEstZero &predictorname &class dummyby;
+    keep Estimate StdErr VarEst AbsDiffEstZero &genename &class dummyby;
 run;
 
 proc sort data=&t..allest;
@@ -1165,8 +448,8 @@ data &t..allest (drop = classprop)
       classcount = classcount + 1;
 
       if last.&class then do;
-         classprop = classcount / &npredictor;
-         label classprop = Proportion of predictors in class;
+         classprop = classcount / &ngene;
+         label classprop = Proportion of genes in class;
          output &t..classcount;
          end;
 
@@ -1210,8 +493,7 @@ data &t..varstat;
 run;
 
 /*****************************************************************************************************/
-/*  Compute the regression-to-the-mean-corrected estimate of the degree of association for each      */
-/*  predictor.                                                                                       */
+/*  Compute the regression-to-the-mean-corrected estimate of the degree of association for each gene */
 /*****************************************************************************************************/
 
 data &t..correctest;
@@ -1227,14 +509,14 @@ data &t..correctest;
      &RMCEstvar = sampmeanest + ((sigmahatbeta**2) / (sigmahatbeta**2 + VarEst)) * (Estimate - sampmeanest);
      AbsEstCorrect = abs(&RMCEstvar);
 
-     keep &predictorname &class direction &RMCEstvar AbsEst AbsEstCorrect;
+     keep &genename &class direction EstCorrect AbsEst AbsEstCorrect;
 
      label direction = Direction of association;
 run; 
 
 
 /*******************************************************************************************************/
-/*  Determine the MLB theta for each predictor using separate class FDR analysis.                           */
+/*  Determine the MLB theta for each gene using separate class FDR analysis.                           */
 /*******************************************************************************************************/
 
 %let flag = 1;  * Flag to signal need to continue the loop.  Will be reset to 0
@@ -1262,14 +544,12 @@ run;
    
          dummyby = 1;   /*  Dummy variable for merge */
 
-         keep Waldp Estimate StdErr VarEst theta &predictorname &class nclass dirtheta classprop dummyby;
+         keep Waldp Estimate StdErr VarEst theta &genename &class nclass dirtheta classprop a;
      run;
 
-%sepclass_theta(indsn=&t..pvalue,predictorname=&predictorname,class=nclass,estimate=Estimate,stderr=StdErr,
+%sepclass_theta(indsn=&t..pvalue,genename=&genename,class=nclass,estimate=Estimate,stderr=StdErr,
                 pvalue=Waldp,direction=dirtheta,lambda=&lambda,theta=theta,
-                outdsn=&t..sepclass,overallq=overallq,sepclassq=sepclassq,
-                goutpath=&goutpath.,
-                class_value_graphname=&class_value_graphname.);
+                outdsn=&t..sepclass,overallq=overallq,sepclassq=sepclassq);
 
 
 data &t..sepclass;
@@ -1301,8 +581,8 @@ run;
 %end;
 
 proc sort data=&t..alltheta;
-  /*Determine maximum theta at which each predictor can still be included in a TDRDA set*/
-   by  &predictorname theta;
+  /*Determine maximum theta at which each gene can still be included in a TDRDA set*/
+   by  &genename theta;
 run;
 
 /* data local.tracetheta;
@@ -1313,9 +593,9 @@ run;
 
 data &t..MLB;
    set &t..alltheta;
-   by &predictorname;
+   by &genename;
 
-   if first.&predictorname then do;
+   if first.&genename then do;
         &MLBvar. = .;
         mxflag = 0;
         end;
@@ -1327,31 +607,31 @@ data &t..MLB;
           then &MLBvar. = max(&MLBvar.,theta);
           else mxflag = 1; /* Failure to reject null hypothesis detected */
 
-   if last.&predictorname then output;
+   if last.&genename then output;
 
    retain &MLBvar. mxflag;
    drop mxflag;
 run;
 
 proc sort data=&t..correctest;
-   by &predictorname;
+   by &genename;
 run;
 
 
-data &t..output;
+data &outdsn;
 /***Create output data set including (transformed) MLB, (transformed) RM-corrected
     estimates, and for graphing, (transformed) RM-corrected estimate of absolute degree 
     of association and the direction of association ******/
    merge &t..MLB &t..correctest;
-   by &predictorname;
+   by &genename;
    %if %length(&transformx) >0 %then %do;
       %let patternid_AEC=%sysfunc(prxparse(s/\(x\)/(AbsEstCorrect)/i));
       txAbsEstCorrect=%sysfunc(prxchange(&patternid_aec.,-1, &transformx));
 
-      %let patternid_MLB=%sysfunc(prxparse(s/\(x\)/(&MLBvar.)/i));
+      %let patternid_MLB=%sysfunc(prxparse(s/\(x\)/(MLB)/i));
       txMLB=%sysfunc(prxchange(&patternid_MLB.,-1, &transformx));
 
-      if last.&predictorname then do;
+      if last.&genename then do;
          %let patternid_zero=%sysfunc(prxparse(s/\(x\)/(&estzero)/i));
          txEstZero=%sysfunc(prxchange(&patternid_zero.,-1, &transformx));
          call symputx("EstZero",TxEstZero);
@@ -1359,7 +639,7 @@ data &t..output;
       
    %end;
    %else %do;
-      txMLB=&MLBvar.;
+      txMLB=MLB;
       txAbsEstCorrect=AbsEstCorrect;
    %end;
 
@@ -1370,23 +650,23 @@ data &t..output;
    label direction = "Direction of Association";
 run;
 
-proc sort data=&t..output;
+proc sort data=&outdsn;
 %if &sortbyclass = yes %then %do;
-   by &class descending txMLB descending AbsEstCorrect &predictorname;
+   by &class descending txMLB descending AbsEstCorrect &genename;
 %end;
                        %else %do;
-   by descending txMLB descending TxAbsEstCorrect &predictorname;
+   by descending txMLB descending TxAbsEstCorrect &genename;
 %end;
 run;
 
+data &outdsn;
+   set &outdsn;
+ 
+   label direction = "Direction of Association";
 
+   keep &class &genename &MLBvar. &RMCEstvar. txMLB TxAbsEstCorrect direction; 
 
-proc sql noprint;
-   create table &outdsn. as
-   select &class, &predictorname., &MLBvar., &RMCEstvar., txMLB, TxAbsEstCorrect, direction
-   from &t..output;
-quit;
-
+run;
 
 /*******************************************************************************************/
 /** Produce TDRDAS graph.                                                                 **/
@@ -1396,19 +676,19 @@ quit;
 
 /*  Decide issues regarding the number of pages of output */
 proc sql noprint;
-   select count(distinct &predictorname) into :nrows from &outdsn
+   select count(distinct &genename) into :nrows from &outdsn
    where txMLB ne .;
 quit; 
    
 %if &nrows >0 %then %do;   
    
-   %let numpages=%sysevalf(&nrows./&maxpredictorsppg.,ceil);  /*calculate the number of pages that will be needed for the graphs*/
-   %let maxpredictorsppg=%sysevalf(&nrows./&numpages.,ceil);   /*evenly divide the predictors onto the pages so the output looks consistent*/
+   %let numpages=%sysevalf(&nrows./&maxgenesppg.,ceil);  /*calculate the number of pages that will be needed for the graphs*/
+   %let maxgenesppg=%sysevalf(&nrows./&numpages.,ceil);   /*evenly divide the genes onto the pages so the output looks consistent*/
 
 
-   %if &maxpredictorsppg <= 50 %then %let fontsize=8;
-   %else %if 50 < &maxpredictorsppg <= 100 %then %let fontsize=6;
-   %else %if 100 < &maxpredictorsppg <= 150 %then %let fontsize=4;
+   %if &maxgenesppg <= 50 %then %let fontsize=8;
+   %else %if 50 < &maxgenesppg <= 100 %then %let fontsize=6;
+   %else %if 100 < &maxgenesppg <= 150 %then %let fontsize=4;
 
 
    /* In 9.2 the font size looks a bit bigger than in 9.1*/
@@ -1416,10 +696,10 @@ quit;
 
    proc sort data=&outdsn out=&t..grpdata;
 %if &sortbyclass = yes %then %do;
-   by &class descending txMLB descending TxAbsEstCorrect &predictorname;
+   by &class descending txMLB descending TxAbsEstCorrect &genename;
 %end;
                        %else %do;
-      by descending txMLB descending TxAbsEstCorrect &predictorname;
+      by descending txMLB descending TxAbsEstCorrect &genename;
 %end;
    run;
 
@@ -1427,15 +707,15 @@ quit;
 
    proc sql noprint;
       select max(TxAbsEstCorrect) into :xmax from &t..grpdata;
-      select max(length(&predictorname.)) into :maxlength from &outdsn;  /* Determine maximum length of label dynamically */
+      select max(length(&genename.))+2 into :maxlength from &outdsn;  /* Determine maximum length of label dynamically */
    quit;
    
- /*  Divide data into segments for presentation on bar graph.   There will now be 2 obs per predictor. */   
+ /*  Divide data into segments for presentation on bar graph.   There will now be 2 obs per gene. */   
    proc format;
-   value  hazgrpf 9="Maximum lower bound for inclusion in &oneminusq TDRDA set: Predictors with negative association"
-                 10="RM-corrected absolute estimate: Predictors with negative association"
-                 11="Maximum lower bound for inclusion in &oneminusq TDRDA set: Predictors with positive association"
-                 12="RM-corrected absolute estimate: Predictors with positive association";
+   value  hazgrpf 9="Maximum lower bound for inclusion in &oneminusq TDRDA set: Genes with negative association"
+                 10="RM-corrected absolute estimate: Genes with negative association"
+                 11="Maximum lower bound for inclusion in &oneminusq TDRDA set: Genes with positive association"
+                 12="RM-corrected absolute estimate: Genes with positive association";
    run;
    
 
@@ -1448,6 +728,7 @@ quit;
       hazgrp=hazgrp+1;
       segment=txAbsEstCorrect-txMLB;
       output;
+
    run;
 
    proc sql;
@@ -1455,8 +736,8 @@ quit;
    quit;
  
    goptions reset=all  
-      device=PNG
-      ftext="Arial Rounded MT Bold"
+      device=png
+      ftext="Albany AMT"
       htext=&fontsize pt
       gsfmode=replace
       hsize=6 in
@@ -1482,28 +763,29 @@ quit;
 
    %do j=1 %to &numpages.;
 
-      %if %eval(&numpages.=1) %then filename gout "&goutpath.\&graphname..PNG";
-      %else filename gout "&goutpath.\&graphname._&j..PNG";;
+      %if %eval(&numpages=1) %then filename gout "&goutpath.\&graphname..png";
+      %else filename gout "&goutpath.\&graphname._&j..png";;
    
    /* Subset data for each page of the graph */
 
-      %let firstobs=%eval(1+(&j-1)*2*&maxpredictorsppg);
-      %let obs=%eval(&j*2*&maxpredictorsppg.);
+      %let firstobs=%eval(1+(&j-1)*2*&maxgenesppg);
+      %let obs=%eval(&j*2*&maxgenesppg.);
 
       data &t..subset;
-         length &predictorname $&maxlength.;
+         length &genename $&maxlength.;
          set &t..grpdata(firstobs=&firstobs obs=&obs.);
+	 &genename=strip(&genename);
       run;
 
       proc sql noprint;
-         select &predictorname into :predictorlist separated by '" "' from &t..subset
+         select &genename into :genelist separated by '" "' from &t..subset
          where hazgrp = 9 or hazgrp = 11;         
       quit;
    
       proc gchart data=&t..subset /*anno=&t..leg*/;
-         hbar &predictorname / subgroup=hazgrp
+         hbar &genename / subgroup=hazgrp
               sumvar=segment
-              midpoints="&predictorlist"
+              midpoints="&genelist"
               autoref
               nostats
               cref=ltgray
@@ -1517,20 +799,20 @@ quit;
 %end; /*if &nrows >0*/
 
 %else %do;
-   %put WARNING : Graph was not produced because there was no predictor with txmlb > . ;
+   %put WARNING : GHI Note: Graph was not produced because there were no genes with txmlb > . ;
 %end;  
 
 %end;
 
-
-/************************************************************************************
-** Clean up data sets and reset mergenoby option to what is was.                    *
-************************************************************************************/
-
+/*
+   Clean Up and Reset
+*/
 proc datasets memtype=data lib=&t. kill nodetails nolist;
 run;
 quit;
 
 options mergenoby=&mergenobyoption.;
 
+libname &t. clear;
+%put _global_;
 %mend tdrdas_sepclass;
