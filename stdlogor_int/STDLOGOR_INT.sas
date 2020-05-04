@@ -1,3 +1,9 @@
+/**********************************************************************************************************************
+WARNING:
+THIS PROGRAM CONTAINS CONFIDENTIAL INFORMATION OF GENOMIC HEALTH, INC. (GHI) AND MAY ONLY 
+BE VIEWED BY PERSONS AUTHORIZED IN WRITING BY GHI. UNAUTHORIZED VIEWING OR DISCLOSURE IS 
+STRICTLY PROHIBITED AND MAY RESULT IN SERIOUS LEGAL CONSEQUENCES.
+***********************************************************************************************************************/
 /***********************************************************************************************************************
 
 Program Name           : STDLOGOR_INT.sas
@@ -25,7 +31,7 @@ Output Datasets/Views  : Specified SAS data set outdsn containing the standardiz
 
 Other Output           : None
 
-Macro calls internal   : Tmp_SubLibL
+Macro calls internal   : None
 
 Macro calls external   : 
 
@@ -358,34 +364,31 @@ Macro calls external   :
 | Purpose        : Name of output data set that will contain the estimated contributions of specified combinations of variables together with
 |                  the standard error of each estimate.                         
 |-----------------------------------------------------------------------------------------------
-**********************************************************************************************************/
+**********************************************************************************************************/;
+/**********************************************************************************************************
+Mod#    Date         Username    Test     Description
+---     -------      --------    ----    -----------------------------------------------------------
+000     20121029     mcrager        
+001     20130708     mcrager             Add option to compute partial standardized log odds ratio.  Add option to compute fraction
+                                         contribution of each variable to overall variance explained.
+002     20161201     mcrager             Correct coding to that variables chi_sq and maxVIF can be renamed.  Distinguish between
+                                         the Scheffe alignment and conservative methods in the labels for the confidence limits.
+003     20180619     mcrager             Correct calculation of Scheffe alignment confidence interval.  Change call to internal
+                                         macro Tmp_SubLibL to equivalent call to external macro Tmp_SubLib.
+004     20200102     mcrager             Add calculation of standard error of proportional contribution to risk score variance.   Add
+                                         calculation of standardized odds ratio (exp of standardized log odds ratio).  Check for nonexistent
+                                         input data set and nonexistent variables in input data set.
+005     20200325     mcrager             Declare macro variables k and L as local.
+006     20200429     mcrager             Correct error message text when detecting nonexistent variables.
+**********************************************************************************************************/;
  
-%local mergenobyoption t nvar nvar2 nadjcov nadjcov2 npartial npadjcov npadjcov2 ncovpadjcov i j nimlby nbyvar byflag skipflag lpartial;
-
-
-%macro Tmp_SubLibL(tmplib=);
-
-   %local temp;
- 
-   %let workpath=%sysfunc(pathname(WORK));
- 
-   %let temp = %trim(%bquote(&workpath.))\%left(&tmplib.);
-   
-   %if %sysfunc(fileexist(&temp.)) = 0 %then %do;
-      systask command "mkdir ""&temp.""" wait;
-   %end;
-   %if %sysfunc(libref(&tmplib.)) %then %do;
-      libname &tmplib. "&temp." filelockwait=60;
-   %end;
-
-%mend Tmp_SubLibL;
+%local mergenobyoption t nvar nvar2 nadjcov nadjcov2 npartial npadjcov npadjcov2 ncovpadjcov i j k L nimlby nbyvar byflag skipflag lpartial;
 
 /* Generate a subdir at &workspace for any temp dataset.*/
 
    %let t = _STLNORI;
    
-
-   %Tmp_SubLibL(tmplib=&t.);
+   %Tmp_SubLib(tmplib=&t.);
 
 /*  Capture status of mergenoby option so it can be reset to its current value at the end of the macro */
 
@@ -402,39 +405,39 @@ options mergenoby=nowarn;
 /* Check for errors in macro parameter specification */
 
    %if %length(&indsn.)=0 %then %do;
-      %put ERROR : STDLOGOR_INT macro parameter indsn must be specified.;
+      %put ERROR : GHI Note: STDLOGOR_INT macro parameter indsn must be specified.;
       %abort;
    %end;
 
    %if %length(&vars.)=0 %then %do;
-      %put ERROR : STDLOGOR_INT macro parameter vars must be specified.;
+      %put ERROR : GHI Note: STDLOGOR_INT macro parameter vars must be specified.;
       %abort;
    %end;
 
 %if %length(&tmt.)=0 %then %do;
-      %put ERROR : STDLOGOR_INT macro parameter tmt must be specified.;
+      %put ERROR : GHI Note: STDLOGOR_INT macro parameter tmt must be specified.;
       %abort;
    %end;
 
    %if %length(&response.)=0 %then %do;
-      %put ERROR : STDLOGOR_INT macro parameter response must be specified.;
+      %put ERROR : GHI Note: STDLOGOR_INT macro parameter response must be specified.;
       %abort;
    %end;
 
    %if %length(&outdsn.)=0 %then %do;
-      %put ERROR : STDLOGOR_INT macro parameter outdsn must be specified.;
+      %put ERROR : GHI Note: STDLOGOR_INT macro parameter outdsn must be specified.;
       %abort;
    %end;
 
    %if %length(&alpha.) %then %do;
    %if %sysevalf(&alpha. <= 0) or %sysevalf(&alpha. >= 1) %then %do;
-      %put ERROR : STDLOGOR_INT macro parameter alpha must be >0 and <1.;
+      %put ERROR : GHI Note: STDLOGOR_INT macro parameter alpha must be >0 and <1.;
       %abort;
    %end;
    %end; 
 
    %if %length(&var_combo_indsn.) > 0 and %length(&contribution_prefix.) = 0 %then %do;
-      %put ERROR : STDLOGOR_INT macro found parameter var_combo_indsn set but parameter contribution_prefix not set.;
+      %put ERROR:  GH Note:  STDLOGOR_INT macro found parameter var_combo_indsn set but parameter contribution_prefix not set.;
       %abort;
       %end;   
   
@@ -557,9 +560,9 @@ options mergenoby=nowarn;
       %let padjcov&npadjcov. = &pvar.;
       %end;
    %else %do;
-      %put ERROR : STDLOGOR_INT macro parameter found specified partial variable &pvar..;
-      %put ERROR : This variable is not specified as an adjustment covariate.;
-      %if %length(&adjcov.) %then %put ERROR : Adjustment covariates:  &adjcov..;
+      %put ERROR : GHI Note: STDLOGOR_INT macro parameter found specified partial variable &pvar..;
+      %put ERROR : GHI Note: This variable is not specified as an adjustment covariate.;
+      %if %length(&adjcov.) %then %put ERROR : GHI Note: Adjustment covariates:  &adjcov..;
       %abort;
       %end;        
 %end; 
@@ -599,42 +602,42 @@ options mergenoby=nowarn;
   %let errcode = 0;
   %let dsid = %sysfunc(open(&indsn.,i));
   %if &dsid. = 0 %then %do;
-     %put ERROR : STDLOOHR macro found that specified input data set &indsn. does not exist.;
+     %put ERROR : GHI note:  STDLOGOR_INT macro found that specified input data set &indsn. does not exist.;
      %abort;
      %end;
    %else %do;
      %do k = 1 %to &nvar.;
           %if %sysfunc(varnum(&dsid.,&&var&k..)) = 0 %then %do;
-            %put ERROR : STDLOGOR_INT macro input data set &indsn. does not contain the variable &&var&k.. specified in parameter vars.;
+            %put ERROR :  GHI note:  STDLOGOR_INT macro input data set &indsn. does not contain the variable &&var&k.. specified in parameter vars.;
             %let errcode = 1;
             %end;
          %end;
      %if %length(&tmt.) %then %do;
          %if %sysfunc(varnum(&dsid.,&tmt.)) = 0 %then %do;
-            %put ERROR : STDLOGHR_INT macro input data set &indsn. does not contain variable &tmt. specified in macro parameter tmt.;
+            %put ERROR :  GHI note:  STDLOGOR_INT macro input data set &indsn. does not contain variable &tmt. specified in macro parameter tmt.;
             %let errcode = 1; 
             %end;
          %end;
      %if %length(&weight.) %then %do;
          %if %sysfunc(varnum(&dsid.,&weight.)) = 0 %then %do;
-            %put ERROR : STDLOGHR_INT macro input data set &indsn. does not contain variable &weight. specified in macro parameter weight.;
+            %put ERROR :  GHI note:  STDLOGOR_INT macro input data set &indsn. does not contain variable &weight. specified in macro parameter weight.;
             %let errcode = 1; 
             %end;
          %end;
      %if %length(&adjcov.) %then %do k = 1 %to &nadjcov.;
           %if %sysfunc(varnum(&dsid.,&&adjcov&k..)) = 0 %then %do;
-            %put ERROR : STDLOOHR_INT macro input data set &indsn. does not contain the variable &&adjcov&k.. specified in macro parameter adjcov.;
+            %put ERROR :  GHI note:  STDLOOHR_INT macro input data set &indsn. does not contain the variable &&adjcov&k.. specified in macro parameter adjcov.;
             %let errcode = 1;
             %end;
          %end;
      %if %length(&sampstrata.) %then %do k = 1 %to &nstrat.;
          %if %sysfunc(varnum(&dsid.,&&strat&k..)) = 0 %then %do;
-            %put ERROR : STDLOGHR_INT macro input data set &indsn. does not contain variable &&strat&k.. specified in macro parameter strata.;
+            %put ERROR :  GHI note:  STDLOGOR_INT macro input data set &indsn. does not contain variable &&strat&k.. specified in macro parameter strata.;
             %let errcode = 1;
             %end;
          %end;
      %if %sysfunc(varnum(&dsid.,&response.)) = 0 %then %do;
-            %put ERROR : STDLOGOR_INT macro input data set &indsn. does not contain the variable &response specified in parameter response.;
+            %put ERROR : GHI note:  STDLOGOR_INT macro input data set &indsn. does not contain the variable &response specified in parameter response.;
             %let errcode = 1;
             %end;
      %let rc = %sysfunc(close(&dsid.));
@@ -645,12 +648,12 @@ options mergenoby=nowarn;
         %let errcode = 0;
         %let dsid = %sysfunc(open(&var_combo_indsn.,i));
         %if &dsid. = 0 %then %do;
-            %put ERROR : STDLOGHR macro variable found that specified combination indicator data set &var_combo_indsn. does not exist.;
+            %put ERROR : GHI note:  STDLOGOR_INT macro variable found that specified combination indicator data set &var_combo_indsn. does not exist.;
             %abort;
             %end;
         %else %do k = 1 %to &nvar.;
             %if %sysfunc(varnum(&dsid.,ind_&&var&k..)) = 0 %then %do;
-                %put ERROR : STDLOGHR macro variable combination indicator data set &var_combo_indsn. does not contain the required variable ind_&&var&k..;
+                %put ERROR : GHI note:  STDLOGOR_INT macro variable combination indicator data set &var_combo_indsn. does not contain the required variable ind_&&var&k..;
                 %let errcode = 1;
                 %end;
             %end;
@@ -703,7 +706,7 @@ proc sql noprint;
 quit;
 
 %if &nresponse. > 2 %then %do;
-     %put ERROR : STDLOGOR_INT macro response variable has more than two values.;
+     %put ERROR : GHI Note: STDLOGOR_INT macro response variable has more than two values.;
      %abort;
 %end;
 
@@ -747,7 +750,7 @@ data &t..colflag;
           imlby = imlby + 1;
           if colflag = 0 then call symput('gocol','1');
           if colflag = 1 then do;
-              put "WARNING:   Collinearity or near collinearity detected";
+              put "WARNING:  GHI Note:  Collinearity or near collinearity detected";
               put "among covariates &vars.";
 %if &byflag. = 1 %then put "for by &byvar. = " &byvar.;;
               put "Standardized log odds ratio not calculated.";
@@ -1100,7 +1103,7 @@ data &t..keys;
 %end;
 
      if missflag = 1 then do;
-        put "WARNING:   Full logistic regression model could not be fit for";
+        put "WARNING:  GHI Note:  Full logistic regression model could not be fit for";
         put "covariates &vars.";
 %if &byflag. = 1 %then put "for &byvar. = " &byvar.;;
         put "Standardized log odds ratio not calculated.";
