@@ -558,10 +558,10 @@ options mergenoby=nowarn;
 
 %let vars = %sysfunc(compbl(&vars.));
 
+%local nvar;
+
 %let nvar = %sysfunc(countc(%bquote(&vars.), %str( )));
 %let nvar = %sysfunc(ifc(%length(%bquote(&vars.)), %eval(&nvar. + 1), 0));
-
-%local nvar;   
 
 %do i = 1 %to &nvar.;
    %local var&i.;
@@ -621,10 +621,11 @@ options mergenoby=nowarn;
 
 %let partial = %sysfunc(compbl(&partial.));
 
+%local npartial pvar npadjcov npstrat;
+
 %let npartial = %sysfunc(countc(%bquote(&partial.), %str( )));
 %let npartial = %sysfunc(ifc(%length(%bquote(&partial.)), %eval(&npartial. + 1), 0));
 
-%local npartial pvar npadjcov npstrat;
 %let npadcov = 0;
 %let npstrat = 0;
 
@@ -665,10 +666,10 @@ options mergenoby=nowarn;
 
 %let strata = %sysfunc(compbl(&strata.));
 
+%local nstrat;  
+
 %let nstrat = %sysfunc(countc(%bquote(&strata.), %str( )));
 %let nstrat = %sysfunc(ifc(%length(%bquote(&strata.)), %eval(&nstrat. + 1), 0));
-
-%local nstrat;   
 
 %do i = 1 %to &nstrat.;
    %local strat&i.;
@@ -706,6 +707,12 @@ options mergenoby=nowarn;
      %abort;
      %end;
    %else %do;
+     %if &byflag. %then %do k = 1 %to &nbyvar.;
+          %if %sysfunc(varnum(&dsid.,&&byvar&k..)) = 0 %then %do;
+            %put ERROR : STDLOGHR macro input data set &indsn. does not contain the variable &&byvar&k.. specified in parameter byvar.;
+            %let errcode = 1;
+            %end;
+         %end;
      %if %sysfunc(varnum(&dsid.,&time.)) = 0 %then %do;
             %put ERROR : STDLOGHR macro input data set &indsn. does not contain variable &time. specified in macro parameter time.;
             %let errcode = 1;
