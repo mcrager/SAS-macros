@@ -468,7 +468,7 @@ options mergenoby=nowarn;
 %if %length(&abs_std_OR_correct_UCL_Scheffe.) = 0 %then %let abs_std_OR_correct_UCL_Scheffe = abs_std_OR_correct_UCL_Scheffe; 
 
 /**********************************************************************************************
-**  Parse the string containing by "by variable".                                             *
+**  Parse the string containing the "by variable".                                            *
 **********************************************************************************************/
 
 %if %length(&byvar.) %then %do;
@@ -884,7 +884,7 @@ data &t..b;
                end;
 
 %do i = 1 %to &nvar.;
-      if Variable = "&&var&i.._tmt" then b&i. = Estimate;
+      if upcase(Variable) = upcase("&&var&i.._tmt") then b&i. = Estimate;
 %end;
 
       if last.&byvar1. %if &nbyvar. > 1 %then %do i = 2 %to &nbyvar.; or last.&&byvar&i.. %end; 
@@ -2062,7 +2062,7 @@ proc sql;
           %end;
           %if %length(&zb_prefix.) %then %do i = 1 %to &nvar.;  &zb_prefix.&i., %end;
           %if %length(&zv_prefix.) %then %do i = 1 %to &nvar2.; &zv_prefix.&i., %end;
-          %if %length(&contribution_prefix.) %then %do i = 1 %to &nvar.; &contribution_prefix._&&var&i.., %end;
+          %if %length(&contribution_prefix.) %then %do i = 1 %to &nvar.; &contribution_prefix._&&var&i.., se_&contribution_prefix._&&var&i.., %end;
           &maxVIF. 
           from &t..outdsn; 
 quit;     
