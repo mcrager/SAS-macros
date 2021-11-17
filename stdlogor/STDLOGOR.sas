@@ -590,7 +590,7 @@ options mergenoby=nowarn;
   %let errcode = 0;
   %let dsid = %sysfunc(open(&indsn.,i));
   %if &dsid. = 0 %then %do;
-     %put ERROR : STDLOOHR macro found that specified input data set &indsn. does not exist.;
+     %put ERROR : STDLOGOR macro found that specified input data set &indsn. does not exist.;
      %abort;
      %end;
    %else %do;
@@ -848,7 +848,7 @@ data &t..b;
                end;
 
 %do i = 1 %to &nvar.;
-      if Variable = "&&var&i.." then b&i. = Estimate;
+      if upcase(Variable) = upcase("&&var&i..") then b&i. = Estimate;
 %end;
 
       if last.&byvar1. %if &nbyvar. > 1 %then %do i = 2 %to &nbyvar.; or last.&&byvar&i.. %end; 
@@ -2026,7 +2026,7 @@ proc sql;
           %end;
           %if %length(&zb_prefix.) %then %do i = 1 %to &nvar.;  &zb_prefix.&i., %end;
           %if %length(&zv_prefix.) %then %do i = 1 %to &nvar2.; &zv_prefix.&i., %end;
-          %if %length(&contribution_prefix.) %then %do i = 1 %to &nvar.; &contribution_prefix._&&var&i.., %end;
+          %if %length(&contribution_prefix.) %then %do i = 1 %to &nvar.; &contribution_prefix._&&var&i.., se_&contribution_prefix._&&var&i.., %end;
           &maxVIF. 
           from &t..outdsn; 
 quit;     
