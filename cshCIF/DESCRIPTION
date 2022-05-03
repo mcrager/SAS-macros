@@ -1,0 +1,21 @@
+Package: cshCIF
+Type: Package
+Title: Cause Specific Hazard Cumulative Incidence Function
+Version: 0.1.0
+Author: Michael R. Crager and Jerome V. Braun
+Maintainer: The package maintainer <jvbraun.statistics@gmail.com>
+Description: Asymptotic confidence intervals are obtained for the
+    cumulative incidence function (absolute risk) of an event in the presence
+    of competing risks using Cox proportional hazard regression of
+    cause-specific hazards.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Depends: R (>= 2.10)
+Imports: survival
+RoxygenNote: 7.1.2
+Suggests: testthat,
+    knitr,
+    rmarkdown,
+    ggplot2
+VignetteBuilder: knitr

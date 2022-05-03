@@ -1,0 +1,98 @@
+---
+title: "Computing Cumulative Incidence Functions  with the `cshCIF` Package"
+author: "Jerome V. Braun"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Computing Cumulative Incidence Functions  with the `cshCIF` Package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+The `cshCIF` package provides basic functionality for estimating the cumulative incidence function (CIF) for an risk of interest in the presence of competing risks.
+
+## Data example
+
+We will use the [`bmtcrr`](http://www.stat.unipg.it/luca/R/) data set (included preloaded in the package).
+
+```{r}
+library(cshCIF)
+
+data(bmtcrr)
+```
+
+The `cshCIF` package requires data in a wide format, with separate time and censoring status variables for each cause. 
+
+Also, the current functionality only allows regression style effects, so all categorical variables, transformed variables, and interactions must be recoded by hand in advance.
+
+```{r}
+df <- data.frame(
+    RTime = bmtcrr$ftime,
+    RStatus = ifelse(bmtcrr$Status == 1, 1, 0),
+    CTime = bmtcrr$ftime,
+    CStatus = ifelse(bmtcrr$Status == 2, 1, 0),
+    Age = bmtcrr$Age,
+    Sex = ifelse(bmtcrr$Sex == "F", 1, 0),
+    CR1 = ifelse(bmtcrr$Phase == "CR1", 1, 0),
+    CR2 = ifelse(bmtcrr$Phase == "CR2", 1, 0),
+    CR3 = ifelse(bmtcrr$Phase == "CR3", 1, 0),
+    Source = ifelse(bmtcrr$Source == "PB", 1, 0)
+)
+```
+
+## Fitting the model
+
+The input to the model must be specified via a list, with the cause of interest as the first element in the list.
+
+Each element of the list is itself a list, defining a name for the cause, the variable giving the time of the event due to the cause, a status variable defining censoring (1 = event, 0 = censored), and the variables to use in the model for that cause.  In this case, "Relapse" is the event of interest.
+
+We model the risk of relapse as a function of age, sex, phase, and source.  The competing risk is modeled as a function of only age and sex.
+
+First, we use the `csh_censor` function to adjust the censoring to account for a potential follow-up window.  In these data, there is no follow-up window, but the function is run to demonstrate its use anyway.
+
+Next, we fit the cause-specific hazard model.
+
+Finally, we estimate the marginal risk at 50 months for a 30-year old female with phase relapse and source PB + BM along with confidence intervals. 
+
+```{r}
+CSH <- list(
+    list(Cause = "Relapse", Time = "RTime", Status = "RStatus", vars = c("Age", "Sex", "CR1", "CR2", "CR3", "Source")),
+    list(Cause = "Competing", Time = "CTime", Status = "CStatus", vars=c("Age", "Sex"))
+)
+
+dfc <- csh_censor(df = df, csh = CSH, fuw = 1)
+fit <- csh_fit(dfc, csh = CSH)
+
+Covariates <- data.frame(Age = 30, Sex = 0, CR1 = 0, CR2 = 0, CR3 = 0, Source = 0)
+
+csh_CIF(fit, Covariates, csh = CSH, risk_times = 50, alpha=0.05, method = "loglog")
+```
+
+## CIF curves
+
+If we do not specify the risk times of interest, then the risk is computed at the unique times in the data set by default.
+
+The following code calculates the CIF for males and females separately.
+
+```{r}
+# Fit the model for PB.
+
+Covariates <- data.frame(Age = 30, Sex = 0, CR1 = 0, CR2 = 0, CR3 = 0, Source = 0)
+CIF.0 <- csh_CIF(fit, Covariates, csh = CSH, alpha=0.05, method = "loglog")
+
+# Fit the model for PB + BM.
+
+Covariates <- data.frame(Age = 30, Sex = 1, CR1 = 0, CR2 = 0, CR3 = 0, Source = 0)
+CIF.1 <- csh_CIF(fit, Covariates, csh = CSH,  alpha=0.05, method = "loglog")
+```
+
+```{r, fig.show='hold'}
+library(ggplot2)
+
+ggplot(rbind(CIF.0, CIF.1), aes(x = risk_time, y = Risk)) +
+    geom_ribbon(aes(ymin = Risk_LCL, ymax = Risk_UCL), fill = "grey70") +
+    geom_step() +
+    facet_wrap(~ ifelse(Sex, "Female", "Male")) +
+    theme_bw()
+```
+
