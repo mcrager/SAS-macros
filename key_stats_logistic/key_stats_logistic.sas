@@ -13,9 +13,7 @@ Purpose                : Perform the logistic regression analysis for an individ
                          
 Notes                  : 
 
-Status                 : Not yet tested or verified.
-
-Run Dependencies       : None
+Run Dependencies       : key_stats_logistic
 
 Input Datasets/Views   : Specified SAS data set indsn containing a binary response variable, covariates for the logistic
                          regression model, and an optional weight variable if cohort sampling was used.
