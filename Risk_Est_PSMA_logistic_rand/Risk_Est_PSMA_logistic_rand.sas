@@ -6,16 +6,14 @@ Path                   :
 
 Program Language       : SAS
 
-Operating System       : Server
+Operating System       : Windows Server
 
 Purpose                : Macro to perform risk estimation using random effects patient-specific meta-analysis and logistic 
                          regression with up to nine studies, accommodating studies with special populations.                       
                          
 Notes                  : 
 
-Status                 : Tested but not yet verified.
-
-Run Dependencies       : None
+Run Dependencies       : key_stats_logistic
 
 Input Datasets/Views   : Data set containing covariate values at which to estimate the event risk.
                          Key statistics data sets for each study
