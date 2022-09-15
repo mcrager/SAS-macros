@@ -6,7 +6,7 @@ Path                   :
 
 Program Language       : SAS
 
-Operating System       : Server
+Operating System       : Windows Server
 
 Purpose                : Macro to perform risk estimation using fixed-effects patient-specific meta-analysis and proportional 
                          hazards regression with up to nine studies, accommodating studies with special populations.                       
