@@ -13,7 +13,7 @@ Purpose                : Macro to perform risk estimation using fixed-effects pa
                          
 Notes                  : 
 
-Run Dependencies       : None
+Run Dependencies       : key_stats_phreg
 
 Input Datasets/Views   : Data set containing covariate values at which to estimate the event risk.
                          Key statistics data sets for each study
