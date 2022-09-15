@@ -12,6 +12,7 @@
    &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Time_to_event">Analysis of time-to-event endpoints (survival analysis) </a> <br />
    &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Binary">Analysis of binary (yes/no) endpoints </a> <br />
    &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Discovery">Discovery analysis </a> <br />
+   &nbsp;&nbsp;&nbsp;&nbsp; <a href="#Patient_specific_meta_analysis">Patient-specific meta-analysis (PSMA) </a> <br />
   
   <a id="Time_to_event"></a><h2>Analysis of time-to-event endpoints (survival analysis) </h2>
 
@@ -85,7 +86,53 @@ ratio to multivariate proportional hazards regression, with an application to cl
 
   <a href="https://github.com/mcrager/SAS-macros/blob/master/tdrdas_sepclass/TDRDAS_SEPCLASS.sas">TDRDAS_SEPCLASS.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://github.com/mcrager/SAS-macros/blob/master/tdrdas_sepclass/Macro%20TDRDAS_SEPCLASS%20User%20Guide.pdf">User guide</a>
+
   
+  <a id="Patient_specific_meta-analysis"></a><h2>Patient-specific meta-analysis (PSMA) </h2>
+  
+  <h3>key_stats_phreg</h3>
+  <p>This macro calculates key summary statistics from a Cox proportional hazards regression to be used in risk assessment with patient-specific meta-analysis.<br />
+  <b>Reference:</b>  Crager MR, Tang G (2014). Patient-specific meta-analysis for risk assessment using multivariate proportional hazards regression.  <i>Journal of Applied Statistics</i> <b>41</b>:2676–2695.</p>   
+  
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_phreg/key_stats_phreg.sas">key_stats_phreg.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_phreg/User%20Guide%20PSMA%20Macros%20for%20PH%20regression.pdf">User guide</a>
+
+  <h3>Risk_Est_PSMA_phreg</h3>
+  <p>Starting with a key statistics data set produced for each of several studies using macro key_stats_phreg, this macro provides point and interval estimates of the risk of an event of interest using fixed-effects patient-specific meta-analysis.<br />
+  <b>Reference:</b>  Crager MR, Tang G (2014). Patient-specific meta-analysis for risk assessment using multivariate proportional hazards regression.  <i>Journal of Applied Statistics</i> <b>41</b>:2676–2695.</p>   
+ 
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/Risk_Est_PSMA_phreg/Risk_Est_PSMA_phreg.sas">Risk_Est_PSMA_phreg.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_phreg/User%20Guide%20PSMA%20Macros%20for%20PH%20regression.pdf">User guide</a>
+  
+  <h3>Risk_Est_PSMA_phreg_rand</h3>
+  <p>Starting with a key statistics data set produced for each of several studies using macro key_stats_phreg, this macro provides point and interval estimates of the risk of an event of interest using random-effects patient-specific meta-analysis.<br />
+  <b>Reference:</b>  Crager MR, Tang G (2014). Patient-specific meta-analysis for risk assessment using multivariate proportional hazards regression.  <i>Journal of Applied Statistics</i> <b>41</b>:2676–2695.</p>   
+ 
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/Risk_Est_PSMA_phreg_rand/Risk_Est_PSMA_phreg_rand.sas">Risk_Est_PSMA_phreg_rand.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_phreg/User%20Guide%20PSMA%20Macros%20for%20PH%20regression.pdf">User guide</a>
+  
+  
+  <h3>key_stats_logistic</h3>
+  <p>This macro calculates key summary statistics from a logistic regression of a binary outcome to be used in risk assessment with patient-specific meta-analysis.<br />
+  <b>Reference:</b>  Crager MR, Tang G (2014). Patient-specific meta-analysis for risk assessment using multivariate proportional hazards regression.  <i>Journal of Applied Statistics</i> <b>41</b>:2676–2695.</p>   
+  
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_logistic/key_stats_phreg.sas">key_stats_logistic.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_phreg/User%20Guide%20PSMA%20Macros%20for%20logistic%20regression.pdf">User guide</a>
+  
+  <h3>Risk_Est_PSMA_logistic</h3>
+  <p>Starting with a key statistics data set produced for each of several studies using macro key_stats_logistic, this macro provides point and interval estimates of the risk of an event of interest using fixed-effects patient-specific meta-analysis.<br />
+  <b>Reference:</b>  Crager MR, Tang G (2014). Patient-specific meta-analysis for risk assessment using multivariate proportional hazards regression.  <i>Journal of Applied Statistics</i> <b>41</b>:2676–2695.</p>   
+ 
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/Risk_Est_PSMA_logistic/Risk_Est_PSMA_logistic.sas">Risk_Est_PSMA_logistic.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_logistic/User%20Guide%20PSMA%20Macros%20for%20PH%20regression.pdf">User guide</a>
+  
+  <h3>Risk_Est_PSMA_logistic_rand</h3>
+  <p>Starting with a key statistics data set produced for each of several studies using macro key_stats_logistic, this macro provides point and interval estimates of the risk of an event of interest using random-effects patient-specific meta-analysis.<br />
+  <b>Reference:</b>  Crager MR, Tang G (2014). Patient-specific meta-analysis for risk assessment using multivariate proportional hazards regression.  <i>Journal of Applied Statistics</i> <b>41</b>:2676–2695.</p>   
+ 
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/Risk_Est_PSMA_logistic_rand/Risk_Est_PSMA_logistic_rand.sas">Risk_Est_PSMA_logistic_rand.sas </a> &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/key_stats_logistic/User%20Guide%20PSMA%20Macros%20for%20PH%20regression.pdf">User guide</a>
+
   
 </body>
 </html>
