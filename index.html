@@ -37,7 +37,7 @@ ratio to multivariate proportional hazards regression, with an application to cl
   <a href="https://github.com/mcrager/SAS-macros/blob/master/Risk_est_PH_reg_time_dep/User%20Guide.pdf">User guide</a>  
   
   <h3>Risk_Est_PH_reg_comp_risk</h3>
-  <p>This macro provides point and interval estimates of the absolute risk (value of the cumulative incidence function) of an event of interest in the presence of competing risks, using proportional regression of cause-specific hazards.  Weighted analyses using stratificed cohort sampling designs, "external" time-dependent covariates and multiple censoring mechanisms are accommodated.<br /> <b>Reference:</b> <br /> Crager MR, Braun JV (2022). Interval estimation of the absolute risk of an event with competing risks using proportional regression of cause-specific hazards. <i>American Journal of Applied Mathematics</i> <b>10</b>:59&ndash;85.</p>
+  <p>This macro provides point and interval estimates of the absolute risk (value of the cumulative incidence function) of an event of interest in the presence of competing risks, using proportional regression of cause-specific hazards Weighted analyses using stratificed cohort sampling designs, "external" time-dependent covariates and multiple censoring mechanisms are accommodated.<br /> <b>Reference:</b> <br /> Crager MR, Braun JV (2022). Interval estimation of the absolute risk of an event with competing risks using proportional regression of cause-specific hazards. <i>American Journal of Applied Mathematics</i> <b>10</b>:59&ndash;85.</p>
   
   <a href="https://github.com/mcrager/SAS-macros/blob/master/risk_est_PH_reg_comp_risk/Risk_Est_PH_reg_comp_risk.sas">Risk_est_PH_reg_comp_risk.sas </a>  &nbsp;&nbsp;&nbsp;&nbsp;
   <a href="https://github.com/mcrager/SAS-macros/blob/master/risk_est_PH_reg_comp_risk/User%20guide.pdf">User guide</a>
@@ -46,6 +46,12 @@ ratio to multivariate proportional hazards regression, with an application to cl
   <p>DEVELOPER:  Jerome V. Braun.  This R package provides much of the same functionality as SAS macro Risk_Est_PH_reg_comp_risk.</p>
   
   <a href="https://github.com/mcrager/SAS-macros/blob/master/cshCIF/">cshCIF </a>  &nbsp;&nbsp;&nbsp;&nbsp;
+  
+  <h3>Risk_Est_PH_reg_prop_score</h3>
+  <p>This macro provides point and interval estimates of the risk of an event of interest using Cox proportional hazards regression with IPTW weighting based on propensity scores, accounting for the variability in the propensity scores estimated using logistic regression.  Propensities for multiple treatments, "external" time-dependent covariates, weighted analyses using stratified cohort sampling designs, and left truncation of event times are accommodated.  The macro also provides the Cox regression parameter and hazard ratio estimates with appropriate variance estimates and diagnostics for assessing balance of covariates across treatments using the IPTW weights.<br /> <b>Reference:</b> <br /> Crager MR (2022). Accounting for propensity score variability in IPTW weighted Cox proportional hazards regression and risk estimation. <i>American Journal of Applied Mathematics</i> In press.</p>
+  
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/Risk_est_PH_reg_prop_score/Risk_Est_PH_reg_prop_score.sas">Risk_Est_PH_reg_prop_score.sas </a>  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/mcrager/SAS-macros/blob/master/Risk_est_PH_reg_prop_score/User%20Guide.pdf">User guide</a>
   
   <a id="Binary"></a> <h2 >Analysis of binary (yes/no) endpoints</h2>
 
