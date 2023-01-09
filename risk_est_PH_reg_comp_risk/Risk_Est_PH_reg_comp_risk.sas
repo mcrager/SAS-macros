@@ -225,7 +225,9 @@ Macro calls external   : None
 /**********************************************************************************************************
 Mod#    Date         Username    Test     Description
 ---     -------      --------    ----    -----------------------------------------------------------
-000     20201022     mcrager             
+000     20201022     mcrager
+001     20230109     mcrager             Change do loop variable "pt" to "_pt" so macro will run correctly
+                                         when the input data set contains the variable "pt".
 **********************************************************************************************************/;
  
 %local byvar nvar_main nvar_main2 num_cr ncalc_var i j k L byflag dpc_var_main dpc_calc_var
@@ -1420,19 +1422,19 @@ data _qq_horiz;
          &programming_time. = pttime(index);
 %end;
          
-         do pt = index to npt;
+         do _pt_ = index to npt;
 
 %do i = 1 %to &ncalc_var.;
-            &&calc_var&i.. = ptcovariate(&i.,pt);
+            &&calc_var&i.. = ptcovariate(&i.,_pt_);
 %end;
 
 %if %length(&programming_statements.) %then %do;
             &programming_statements.;
 %end;
              
-             if pt_tie_ind_main(pt) = 1 then do;
-                exp_xbeta_main = pt_tie_wt_exp_xbeta_main(pt);
-                qqweight = pt_tie_wt_main(pt);
+             if pt_tie_ind_main(_pt_) = 1 then do;
+                exp_xbeta_main = pt_tie_wt_exp_xbeta_main(_pt_);
+                qqweight = pt_tie_wt_main(_pt_);
                 end;
              
              else do;
@@ -1441,12 +1443,12 @@ data _qq_horiz;
                 xbeta_pt = xbeta_pt + b_main&i. * &&var_main&i..;
 %end;
                 exp_xbeta_main = exp(xbeta_pt);
-                qqweight = ptweight(pt);
+                qqweight = ptweight(_pt_);
                 end;
 
-             denominator = denominator + pt_recind_main(pt) * qqweight * exp_xbeta_main;
+             denominator = denominator + pt_recind_main(_pt_) * qqweight * exp_xbeta_main;
 %do i = 1 %to &nvar_main.;
-             cov_sum&i. = cov_sum&i. + pt_recind_main(pt) * qqweight * &&var_main&i.. * exp_xbeta_main;
+             cov_sum&i. = cov_sum&i. + pt_recind_main(_pt_) * qqweight * &&var_main&i.. * exp_xbeta_main;
 %end;
              end;
 
@@ -1488,19 +1490,19 @@ data _qq_horiz;
          &programming_time. = pttime(index);
 %end;
 
-         do pt = index to npt;
+         do _pt_ = index to npt;
 
 %do i = 1 %to &ncalc_var.;
-             &&calc_var&i.. = ptcovariate(&i.,pt);
+             &&calc_var&i.. = ptcovariate(&i.,_pt_);
 %end;
 
 %if %length(&programming_statements.) %then %do;
              &programming_statements.;
 %end;
              
-             if pt_tie_ind_cr&k.(pt) = 1 then do;
-                exp_xbeta_cr&k. = pt_tie_wt_exp_xbeta_cr&k.(pt);
-                qqweight = pt_tie_wt_cr&k.(pt);
+             if pt_tie_ind_cr&k.(_pt_) = 1 then do;
+                exp_xbeta_cr&k. = pt_tie_wt_exp_xbeta_cr&k.(_pt_);
+                qqweight = pt_tie_wt_cr&k.(_pt_);
                 end;
              
              else do;
@@ -1509,12 +1511,12 @@ data _qq_horiz;
                 xbeta_pt = xbeta_pt + b_cr&k._&i. * %scan(&&vars_cr&k.., &i., %str( ));
 %end;
                 exp_xbeta_cr&k. = exp(xbeta_pt);
-                qqweight = ptweight(pt);
+                qqweight = ptweight(_pt_);
                 end;
 
-             denominator = denominator + pt_recind_cr&k.(pt) * qqweight * exp_xbeta_cr&k.;
+             denominator = denominator + pt_recind_cr&k.(_pt_) * qqweight * exp_xbeta_cr&k.;
 %do i = 1 %to &&nvar_cr&k..;
-             cov_sum&i. = cov_sum&i. + pt_recind_cr&k.(pt) * qqweight * %scan(&&vars_cr&k.., &i., %str( )) * exp_xbeta_cr&k.;
+             cov_sum&i. = cov_sum&i. + pt_recind_cr&k.(_pt_) * qqweight * %scan(&&vars_cr&k.., &i., %str( )) * exp_xbeta_cr&k.;
 %end;
              end;
 
