@@ -856,16 +856,16 @@ data _qq_horiz;
 
          &time. = pttime(index);
          
-         do pt = index to npt;
+         do _pt_ = index to npt;
              
-             if pt_tie_ind(pt) = 1 then do;
-                exp_xbeta = pt_tie_wt_exp_xbeta(pt);
-                qqweight = pt_tie_wt(pt);
+             if pt_tie_ind(_pt_) = 1 then do;
+                exp_xbeta = pt_tie_wt_exp_xbeta(_pt_);
+                qqweight = pt_tie_wt(_pt_);
                 end;
              
              else do;
 %do i = 1 %to &ncalc_var.;
-                &&calc_var&i.. = ptcovariate(&i.,pt);
+                &&calc_var&i.. = ptcovariate(&i.,_pt_);
 %end;
                 &programming_statements.;
 
@@ -874,11 +874,11 @@ data _qq_horiz;
                 xbeta_pt = xbeta_pt + b&i. * &&var&i..;
 %end;
                 exp_xbeta = exp(xbeta_pt);
-                qqweight = ptweight(pt);
+                qqweight = ptweight(_pt_);
                 end;
 
 %if %length(&entrytime.) %then %do;
-             if &time. >= ptentrytime(pt) then do;
+             if &time. >= ptentrytime(_pt_) then do;
                   denominator = denominator + qqweight * exp_xbeta;
 %do i = 1 %to &nvar.;
                   cov_sum&i. = cov_sum&i. + qqweight * &&var&i.. * exp_xbeta;
